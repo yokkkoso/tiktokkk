@@ -1,5 +1,6 @@
 package me.yokkkoso.tiktokkk.tabbar;
 
+import me.yokkkoso.tiktokkk.Ids;
 import me.yokkkoso.tiktokkk.Prefs;
 import me.yokkkoso.tiktokkk.TikToKKK;
 
@@ -9,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayDeque;
-import java.util.Locale;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
@@ -50,12 +50,10 @@ public final class TabBar {
                 View tab = bar.getChildAt(i);
                 CharSequence dsc = tab.getContentDescription();
                 if (dsc == null || !(tab instanceof ViewGroup)) continue;
-                String name = dsc.toString();
-                String d = name.toLowerCase(Locale.ROOT);
-                boolean friends = d.contains("друз") || d.contains("friend");
-                boolean inbox = d.contains("вход") || d.contains("inbox") || d.contains("сообщ")
-                        || d.contains("уведомл") || d.contains("notif");
-                processTab((ViewGroup) tab, name, labels,
+                String tid = Ids.nameOf(tab);   // 46.0.3: Friends nw7, Inbox nw9 (language-independent)
+                boolean friends = Ids.FRIENDS_TAB.contains(tid);
+                boolean inbox = Ids.INBOX_TAB.contains(tid);
+                processTab((ViewGroup) tab, dsc.toString(), labels,
                         (friends && friendsB) || (inbox && inboxB));
             }
         } catch (Throwable ignored) {}

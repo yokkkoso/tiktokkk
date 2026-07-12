@@ -180,12 +180,9 @@ public final class ProfileExtras {
         return false;
     }
 
+    // 46.0.3: the profile follower/following count labels are id s5x (language-independent).
     private static boolean isFollowersLabel(View v) {
-        if (!(v instanceof TextView)) return false;
-        CharSequence t = ((TextView) v).getText();
-        if (t == null) return false;
-        String s = t.toString().toLowerCase(Locale.ROOT);
-        return s.contains("подписчик") || s.contains("follower");
+        return v instanceof TextView && "s5x".equals(Ids.nameOf(v));
     }
 
     private static void wireProfileHeader(View label) {

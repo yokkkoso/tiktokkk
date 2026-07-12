@@ -12,6 +12,7 @@ import android.widget.TextView;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
+import me.yokkkoso.tiktokkk.Ids;
 import me.yokkkoso.tiktokkk.Prefs;
 import me.yokkkoso.tiktokkk.TikToKKK;
 import me.yokkkoso.tiktokkk.download.VideoDownloader;
@@ -95,7 +96,7 @@ public final class OverlayFab {
             View kkk = decor.findViewWithTag(BTN_TAG);
             View down = decor.findViewWithTag("kkk_dl");
             if (kkk == null && down == null) return;
-            boolean[] r = {false, false, false};   // {ownProfileOnScreen, videoPostOnScreen, anyProfileOnScreen}
+            boolean[] r = {false, false};   // {ownProfileOnScreen, videoPostOnScreen}
             scanScreen(decor, r, 0);
             if (kkk != null) kkk.setVisibility((Menu.DEV || r[0]) ? View.VISIBLE : View.GONE);
             if (down != null) down.setVisibility(
@@ -106,14 +107,21 @@ public final class OverlayFab {
     private static final android.graphics.Rect RC = new android.graphics.Rect();
 
     private static void scanScreen(View v, boolean[] r, int depth) {
-        if (v == null || depth > 32 || (r[0] && r[1] && r[2])) return;
+        if (v == null || depth > 32 || (r[0] && r[1])) return;
         if (v.getVisibility() != View.VISIBLE) return;
-        if (!r[1]) {
-            CharSequence cd = v.getContentDescription();
-            if (cd != null) {
-                String s = cd.toString().toLowerCase(java.util.Locale.ROOT);
-                if ((s.contains("поставить лайк") || s.contains("вам понравилось")
-                        || s.startsWith("like")) && v.getGlobalVisibleRect(RC)) r[1] = true;
+        if (!r[1] && v.getGlobalVisibleRect(RC)) {
+            // A real post player shows the interaction-rail LIKE button (obfuscated ids). Match that
+            // id, NOT text like the profile "Liked videos" tab or a bare "Like" count that the old
+            // startsWith("like") wrongly caught. Id is precise and language-independent.
+            String lid = Ids.nameOf(v);
+            if (lid != null && Ids.LIKE_BTN.contains(lid)) {
+                r[1] = true;
+            } else {
+                CharSequence cd = v.getContentDescription();
+                if (cd != null) {
+                    String s = cd.toString().toLowerCase(java.util.Locale.ROOT);
+                    if (s.contains("поставить лайк") || s.contains("вам понравилось")) r[1] = true;
+                }
             }
         }
         if (v instanceof TextView) {
@@ -129,10 +137,6 @@ public final class OverlayFab {
                         || s.contains("войти") || s.contains("зарегистр")
                         || s.contains("log in") || s.contains("sign up"))
                         && v.getGlobalVisibleRect(RC)) r[0] = true;
-                // any profile page (own or other) shows a "Подписчики"/"followers" count label;
-                // the FYP itself only shows the "Подписки"/Following tab, so match followers only
-                if (!r[2] && (s.contains("подписчик") || s.contains("follower"))
-                        && v.getGlobalVisibleRect(RC)) r[2] = true;
             }
         }
         if (v instanceof ViewGroup) {

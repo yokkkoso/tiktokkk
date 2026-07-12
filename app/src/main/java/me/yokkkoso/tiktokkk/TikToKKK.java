@@ -270,7 +270,7 @@ public class TikToKKK implements IXposedHookLoadPackage {
         }
         boolean plus = Prefs.is(Prefs.HIDE_PLUS_BUTTON);
         boolean ai = Prefs.is(Prefs.HIDE_AI_ASSISTANT);
-        if ((plus && (Ids.matches(v, Ids.CREATE_TAB) || isCreateByDesc(v)))
+        if ((plus && Ids.matches(v, Ids.CREATE_TAB))
                 || (ai && Ids.matches(v, Ids.AI_ASSISTANT))) {
             v.setVisibility(View.GONE);
             return;
@@ -279,14 +279,6 @@ public class TikToKKK implements IXposedHookLoadPackage {
             ViewGroup g = (ViewGroup) v;
             for (int i = 0; i < g.getChildCount(); i++) hideTargetsIn(g.getChildAt(i));
         }
-    }
-
-    private boolean isCreateByDesc(View v) {
-        CharSequence d = v.getContentDescription();
-        if (d == null) return false;
-        String s = d.toString().trim().toLowerCase();
-        return s.equals("create") || s.equals("upload") || s.contains("create post")
-                || s.equals("создать") || s.equals("загрузить");
     }
 
     private void safe(String name, Runnable r) {

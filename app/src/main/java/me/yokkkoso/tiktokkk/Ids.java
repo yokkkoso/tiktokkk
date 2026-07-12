@@ -12,8 +12,10 @@ public final class Ids {
     // fud is shared between like/share so it is intentionally excluded.
     public static final List<String> LIKE_BTN = Arrays.asList("ftu", "fu0", "fu1", "fu_", "fu2");
     public static final List<String> FOLLOW_BTN = Arrays.asList("idu", "iek", "ieu");
-    public static final List<String> CREATE_TAB = Arrays.asList(
-            "video_shoot_container", "create_aweme_button", "creation_entrance");
+    // 46.0.3 bottom-nav tabs: Home nw8, Friends nw7, Create nw4, Inbox nw9, Profile nw_.
+    public static final List<String> CREATE_TAB = Arrays.asList("nw4");
+    public static final List<String> FRIENDS_TAB = Arrays.asList("nw7");
+    public static final List<String> INBOX_TAB = Arrays.asList("nw9");
     public static final List<String> AI_ASSISTANT = Arrays.asList(
             "tako", "vs_tako_entrance", "aigc_entrance", "view_stub_ep_aigc_entrance", "x_n", "xvh");
 

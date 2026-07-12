@@ -2,17 +2,17 @@
 
 Xposed/LSPosed module for the Android TikTok app, with added tweaks and fixes.
 
-TikTok **v46.0.3** is ***strongly*** recommended for proper compatibility.
+> ❗❗❗ **Only TikTok `46.0.3` is supported.** ❗❗❗
+> Detection relies on TikTok's hardcoded (obfuscated) resource-ids and model symbols, which change
+> on every TikTok update - on any other version features will silently misbehave or do nothing. The
+> module logs the detected host version on start and warns if it isn't `46.0.3`.
 
-This project bundles a set of quality-of-life tweaks for TikTok — ad and clutter filtering, action
-confirmations, unrestricted and high-quality downloads, region spoofing, profile helpers, and more —
+This project bundles a set of quality-of-life tweaks for TikTok - ad and clutter filtering, action
+confirmations, unrestricted and high-quality downloads, region spoofing, profile helpers, and more -
 all configurable from an in-app settings panel (a small **⚙️** button on your own TikTok profile page).
 
 When building from source, the module is compiled against the Android SDK and injected into TikTok
-either as a rooted **LSPosed** module or a rootless **LSPatch** patch. Follow either method in
-[Install](#install) and you'll end up with the latest build. Most features match TikTok's obfuscated
-symbols by resource-id name or content description, so they survive many app updates; a few are
-pinned to `46.0.3` and self-disable on other builds (the module logs the detected version on start).
+as either a rooted **LSPosed** module or a rootless **LSPatch** patch - see [Install](#install).
 
 Added settings:
 - **Feed ad filtering**: Hide sponsored posts across the For You, Following, and search feeds.
