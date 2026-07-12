@@ -44,8 +44,14 @@ apksigner sign --ks your-key.jks app/build/outputs/apk/release/app-release-unsig
 
 ## Install
 
-A prebuilt APK is posted in the [Telegram channel](https://t.me/tiktokkkmod) if you'd rather not
-build from source.
+Prebuilt APKs are posted in the [Telegram channel](https://t.me/tiktokkkmod), or install from the
+F-Droid repos below for automatic updates.
+
+**F-Droid (auto-updates):** add a repo in F-Droid / Droid-ify (Settings → Repositories → +):
+- No root (rootless build): `https://fdroid.yokkkoso.me/rootless/repo`
+- Root / LSPosed (module):  `https://fdroid.yokkkoso.me/root/repo`
+
+Then find "tiktokkk" and install.
 
 **Rooted (LSPosed):** install the signed APK, enable it in LSPosed, scope it to TikTok, then
 force-stop/restart TikTok.
