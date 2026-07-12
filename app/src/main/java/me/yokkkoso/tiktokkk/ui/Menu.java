@@ -28,7 +28,7 @@ import me.yokkkoso.tiktokkk.Prefs;
 public final class Menu {
 
     public static final boolean DEV = false;
-    static final String VERSION = "1.1.2";
+    static final String VERSION = "1.2.0";
 
     private static Dialog CURRENT;
     private static FrameLayout HOST;
