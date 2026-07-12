@@ -180,6 +180,9 @@ public final class Loc {
         M.put("Ask before liking a story", "Спрашивать перед лайком истории");
         M.put("Ask before quick-sharing a video", "Спрашивать перед быстрым шэром");
         M.put("Ask before reposting a video", "Спрашивать перед репостом");
+        M.put("Confirm before favorite", "Подтверждать добавление в избранное");
+        M.put("Ask before adding a video to favorites", "Спрашивать перед добавлением в избранное");
+        M.put("Add to favorites?", "Добавить в избранное?");
         M.put("Logs", "Логи");
         M.put("Share", "Поделиться");
         M.put("Clear", "Очистить");

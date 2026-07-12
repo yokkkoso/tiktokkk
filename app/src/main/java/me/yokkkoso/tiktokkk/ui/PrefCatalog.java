@@ -27,7 +27,8 @@ public final class PrefCatalog {
         GROUPS.put("Confirmations", new String[][]{
                 {"", Prefs.CONFIRM_LIKE, Prefs.CONFIRM_UNLIKE, Prefs.CONFIRM_COMMENT_LIKE,
                         Prefs.CONFIRM_DISLIKE_COMMENT, Prefs.CONFIRM_STORY_LIKE, Prefs.CONFIRM_FOLLOW,
-                        Prefs.CONFIRM_QUICK_SHARE, Prefs.CONFIRM_QUICK_REPOST}});
+                        Prefs.CONFIRM_QUICK_SHARE, Prefs.CONFIRM_QUICK_REPOST,
+                        Prefs.CONFIRM_FAVORITE}});
         GROUPS.put("Feed", new String[][]{
                 {"Content & Display", Prefs.SHOW_FYP_TIMESTAMP, Prefs.SHOW_POST_REGION,
                         Prefs.FORCE_PROGRESS_BAR, Prefs.HIDE_AI_ASSISTANT, Prefs.HIDE_FIND_SIMILAR,
@@ -55,6 +56,7 @@ public final class PrefCatalog {
         LABELS.put(Prefs.CONFIRM_STORY_LIKE, "Confirm before story like");
         LABELS.put(Prefs.CONFIRM_QUICK_SHARE, "Confirm before quick share");
         LABELS.put(Prefs.CONFIRM_QUICK_REPOST, "Confirm before quick repost");
+        LABELS.put(Prefs.CONFIRM_FAVORITE, "Confirm before favorite");
         LABELS.put(Prefs.HIDE_FEED_ADS, "Hide ads");
         LABELS.put(Prefs.HIDE_LIVE, "Disable live streaming (in feed)");
         LABELS.put(Prefs.HIDE_SLIDESHOW, "Hide photo slideshows");
@@ -95,6 +97,7 @@ public final class PrefCatalog {
         DESCS.put(Prefs.CONFIRM_STORY_LIKE, "Ask before liking a story");
         DESCS.put(Prefs.CONFIRM_QUICK_SHARE, "Ask before quick-sharing a video");
         DESCS.put(Prefs.CONFIRM_QUICK_REPOST, "Ask before reposting a video");
+        DESCS.put(Prefs.CONFIRM_FAVORITE, "Ask before adding a video to favorites");
         DESCS.put(Prefs.HIDE_FEED_ADS, "Remove sponsored posts from the feed");
         DESCS.put(Prefs.HIDE_LIVE, "Skip live streams in the feed");
         DESCS.put(Prefs.HIDE_SLIDESHOW, "Skip photo slideshow posts");

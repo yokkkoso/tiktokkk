@@ -19,6 +19,7 @@ public final class Prefs {
     public static final String CONFIRM_STORY_LIKE = "confirm_story_like";
     public static final String CONFIRM_QUICK_SHARE = "confirm_quick_share";
     public static final String CONFIRM_QUICK_REPOST = "confirm_quick_repost";
+    public static final String CONFIRM_FAVORITE = "confirm_favorite";
     public static final String SHOW_FYP_TIMESTAMP = "fyp_timestamp";
     public static final String SHOW_POST_REGION = "show_post_region";
     public static final String FORCE_PROGRESS_BAR = "force_progress_bar";
@@ -69,6 +70,7 @@ public final class Prefs {
         BOOL_DEFAULTS.put(CONFIRM_STORY_LIKE, false);
         BOOL_DEFAULTS.put(CONFIRM_QUICK_SHARE, false);
         BOOL_DEFAULTS.put(CONFIRM_QUICK_REPOST, false);
+        BOOL_DEFAULTS.put(CONFIRM_FAVORITE, false);
         BOOL_DEFAULTS.put(SHOW_FYP_TIMESTAMP, true);
         BOOL_DEFAULTS.put(SHOW_POST_REGION, true);
         BOOL_DEFAULTS.put(FORCE_PROGRESS_BAR, true);

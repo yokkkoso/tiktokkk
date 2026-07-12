@@ -60,6 +60,7 @@ public class TikToKKK implements IXposedHookLoadPackage {
         safe("tabBar", () -> TabBar.install(cl));
         safe("profileExtras", () -> ProfileExtras.install(cl));
         safe("commentConfirm", () -> CommentConfirm.install(cl));
+        safe("favoriteConfirm", () -> me.yokkkoso.tiktokkk.feed.FavoriteConfirm.install(cl));
         safe("downloadUnlock", () -> DownloadUnlock.install(cl));
         safe("watermarkRemover", () -> WatermarkRemover.install(cl));
         safe("videoDownloader", () -> VideoDownloader.install(cl));
