@@ -48,6 +48,7 @@ public class TikToKKK implements IXposedHookLoadPackage {
         safe("hidePlusButton", this::hookHidePlusButton);
         safe("disableSecure", this::hookDisableSecure);
         safe("modMenu", OverlayFab::installTrigger);
+        safe("settingsEntry", () -> me.yokkkoso.tiktokkk.ui.SettingsEntry.install(cl));
         safe("feedFilter", () -> FeedFilter.install(cl));
         safe("searchAdFilter", () -> SearchAdFilter.install(cl));
         safe("refreshBlock", () -> RefreshBlock.install(cl));
@@ -308,7 +309,7 @@ public class TikToKKK implements IXposedHookLoadPackage {
         } catch (Throwable ignored) {}
     }
 
-    static android.app.Activity activityOf(Context c) {
+    public static android.app.Activity activityOf(Context c) {
         while (c instanceof android.content.ContextWrapper) {
             if (c instanceof android.app.Activity) return (android.app.Activity) c;
             c = ((android.content.ContextWrapper) c).getBaseContext();

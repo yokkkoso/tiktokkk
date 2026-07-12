@@ -180,7 +180,6 @@ public final class Menu {
                 .setSingleChoiceItems(items, cur, (d, which) -> {
                     Theme.ACCENT = Theme.ACCENTS[which];
                     Prefs.setInt(Prefs.ACCENT_COLOR, Theme.ACCENT);
-                    OverlayFab.recolorFab(a);
                     d.dismiss();
                     navCategory(a, PrefCatalog.MISC_CAT);
                 })
@@ -233,7 +232,6 @@ public final class Menu {
                 .setPositiveButton(android.R.string.ok, (d, w) -> {
                     boolean ok = Prefs.importAll(et.getText().toString());
                     Theme.ACCENT = Prefs.accentColor();
-                    OverlayFab.recolorFab(a);
                     toast(a, Loc.t(ok ? "Imported — restart to apply" : "Nothing to import"));
                     navMain(a);
                 })
@@ -248,7 +246,6 @@ public final class Menu {
                 .setPositiveButton(android.R.string.ok, (d, w) -> {
                     Prefs.resetAll();
                     Theme.ACCENT = Prefs.accentColor();
-                    OverlayFab.recolorFab(a);
                     toast(a, Loc.t("Settings reset"));
                     navMain(a);
                 })

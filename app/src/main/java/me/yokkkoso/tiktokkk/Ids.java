@@ -34,6 +34,7 @@ public final class Ids {
     public static final List<String> FIND_SIMILAR_BOX = Arrays.asList("bq", "br");
     public static final List<String> AVATAR_IMG = Arrays.asList("user_avatar", "vnh");
     public static final List<String> COMMENT_SHEET = Arrays.asList("ecj", "ec6", "i4h");
+    public static final String DRAWER_LIST = "s2b";                  // profile side-drawer menu list
 
     public static String nameOf(View v) {
         try {
