@@ -1,0 +1,222 @@
+package me.yokkkoso.tiktokkk.feed;
+
+import me.yokkkoso.tiktokkk.Countries;
+import me.yokkkoso.tiktokkk.Ids;
+import me.yokkkoso.tiktokkk.Loc;
+import me.yokkkoso.tiktokkk.Prefs;
+import me.yokkkoso.tiktokkk.TikToKKK;
+
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
+import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedHelpers;
+
+public final class FeedDecorator {
+
+    private static final SimpleDateFormat FMT = new SimpleDateFormat("dd.MM.yyyy", Locale.US);
+    private static final int DIM = 0x99FFFFFF;
+    private static final long WEEK_MS = 7L * 24 * 3600 * 1000;
+    private static final ThreadLocal<Boolean> REENTRY = new ThreadLocal<>();
+
+    public static void install(ClassLoader cl) {
+        try {
+            XposedHelpers.findAndHookMethod(TextView.class, "setText",
+                    CharSequence.class, TextView.BufferType.class, new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) {
+                    if (Boolean.TRUE.equals(REENTRY.get())) return;
+                    TextView tv = (TextView) param.thisObject;
+                    if (Prefs.is(Prefs.DEBUG_CLICKS)) debugLog(tv);
+                    hideFindSimilar(tv);
+                    hideSearchBar(tv);
+                    hideSearchAiButton(tv);
+                    String id = Ids.nameOf(tv);
+                    if (id == null) return;
+                    if (id.equals("title")) stampTitle(tv);
+                }
+            });
+        } catch (Throwable t) {
+            TikToKKK.log("feed decorator install failed: " + t);
+        }
+    }
+
+    private static void stampTitle(TextView tv) {
+        boolean showDate = Prefs.is(Prefs.SHOW_FYP_TIMESTAMP);
+        boolean showFlag = Prefs.is(Prefs.SHOW_POST_REGION);
+        if (!showDate && !showFlag) return;
+        if (nativeDateNearby(tv)) return;
+        try {
+            CharSequence t = tv.getText();
+            if (t == null) return;
+            String s = t.toString();
+            if (s.isEmpty() || s.length() > 80) return;
+            long ct = AuthorDates.forHandle(s);
+            if (ct <= 0) return;
+
+            String region = showFlag ? AuthorDates.regionForHandle(s) : null;
+            String flag = region != null && region.length() == 2 ? Countries.flag(region) : null;
+            if (flag == null && !showDate) return;
+            String display = s.length() > 18 ? s.substring(0, 18).trim() + "…" : s;
+
+            SpannableStringBuilder sb = new SpannableStringBuilder();
+            int flagEnd = 0;
+            if (flag != null) {
+                sb.append(flag).append("  ·  ");
+                flagEnd = sb.length();
+            }
+            sb.append(display);
+            int dateStart = sb.length();
+            if (showDate) {
+                sb.append("  ·  ").append(formatDate(ct));
+            }
+            if (showDate) {
+                sb.setSpan(new ForegroundColorSpan(DIM), dateStart, sb.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            REENTRY.set(Boolean.TRUE);
+            try {
+                tv.setText(sb);
+            } finally {
+                REENTRY.set(Boolean.FALSE);
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    private static boolean nativeDateNearby(View title) {
+        try {
+            View c = title;
+            for (int i = 0; i < 2 && c.getParent() instanceof View; i++) c = (View) c.getParent();
+            return findPostTime(c, 0);
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    private static boolean findPostTime(View v, int depth) {
+        if (v == null || depth > 5) return false;
+        // Only a VISIBLE, non-empty native date counts — the FYP layout keeps a hidden/empty
+        // tv_post_time in the tree, which must not suppress our stamp.
+        if ("tv_post_time".equals(Ids.nameOf(v)) && v.getVisibility() == View.VISIBLE
+                && v instanceof TextView) {
+            CharSequence t = ((TextView) v).getText();
+            if (t != null && t.length() > 0) return true;
+        }
+        if (v instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) {
+                if (findPostTime(g.getChildAt(i), depth + 1)) return true;
+            }
+        }
+        return false;
+    }
+
+    private static String formatDate(long ctSeconds) {
+        long postMs = ctSeconds * 1000L;
+        long diff = System.currentTimeMillis() - postMs;
+        if (diff < 0) diff = 0;
+        return diff < WEEK_MS ? relative(diff) : FMT.format(new Date(postMs));
+    }
+
+    private static String relative(long diffMs) {
+        long min = diffMs / 60000L;
+        if (min < 1) return Loc.isRu() ? "только что" : "just now";
+        if (min < 60) return min + (Loc.isRu() ? "м назад" : "m ago");
+        long h = min / 60L;
+        if (h < 24) return h + (Loc.isRu() ? "ч назад" : "h ago");
+        long d = h / 24L;
+        return d + (Loc.isRu() ? "д назад" : "d ago");
+    }
+
+    private static void hideFindSimilar(TextView tv) {
+        if (!Prefs.is(Prefs.HIDE_FIND_SIMILAR)) return;
+        try {
+            if (!(tv.getParent() instanceof ViewGroup)) return;
+            ViewGroup row = (ViewGroup) tv.getParent();
+            boolean findIcon = false;
+            for (int i = 0; i < row.getChildCount(); i++) {
+                CharSequence d = row.getChildAt(i).getContentDescription();
+                if (d == null) continue;
+                String ds = d.toString().trim().toLowerCase(Locale.ROOT);
+                if (ds.equals("найти") || ds.equals("find")) {
+                    findIcon = true;
+                    break;
+                }
+            }
+            if (!findIcon) return;
+            View target = row;
+            if (target.getParent() instanceof View) target = (View) target.getParent();
+            target.setVisibility(View.GONE);
+        } catch (Throwable ignored) {}
+    }
+
+    private static void hideSearchBar(final TextView tv) {
+        if (!Prefs.is(Prefs.HIDE_SEARCH_BAR)) return;
+        try {
+            CharSequence t = tv.getText();
+            if (t == null) return;
+            String s = t.toString().trim().toLowerCase(Locale.ROOT);
+            if (!(s.startsWith("поиск ·") || s.startsWith("поиск·")
+                    || s.startsWith("search ·") || s.startsWith("search·"))) return;
+            Runnable hide = () -> {
+                View cur = tv;
+                for (int i = 0; i < 6 && cur.getParent() instanceof View; i++) {
+                    cur = (View) cur.getParent();
+                    if (cur.isClickable() && cur.getHeight() < 400) {
+                        cur.setVisibility(View.GONE);
+                        return;
+                    }
+                }
+            };
+            hide.run();
+            tv.postDelayed(hide, 400);
+        } catch (Throwable ignored) {}
+    }
+
+    private static void hideSearchAiButton(TextView tv) {
+        if (!Prefs.is(Prefs.HIDE_AI_ASSISTANT)) return;
+        try {
+            CharSequence t = tv.getText();
+            if (t == null) return;
+            String s = t.toString().trim().toLowerCase(Locale.ROOT);
+            if (!(s.equals("лучшее") || s.equals("top"))) return;
+            View strip = tv;
+            for (int i = 0; i < 10 && !(strip instanceof HorizontalScrollView); i++) {
+                if (!(strip.getParent() instanceof View)) return;
+                strip = (View) strip.getParent();
+            }
+            if (!(strip instanceof HorizontalScrollView)
+                    || !(strip.getParent() instanceof ViewGroup)) return;
+            ViewGroup holder = (ViewGroup) strip.getParent();
+            for (int i = 0; i < holder.getChildCount(); i++) {
+                View c = holder.getChildAt(i);
+                if (c != strip && c.getWidth() > 0 && c.getWidth() < 160 && c.getLeft() < 40) {
+                    c.setVisibility(View.GONE);
+                }
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    private static void debugLog(TextView tv) {
+        try {
+            String id = Ids.nameOf(tv);
+            if (id == null) return;
+            CharSequence t = tv.getText();
+            String txt = t == null ? "" : t.toString();
+            if (txt.length() > 24) txt = txt.substring(0, 24);
+            TikToKKK.log("TV id=" + id + " cls=" + tv.getClass().getSimpleName()
+                    + " text=[" + txt + "]");
+        } catch (Throwable ignored) {}
+    }
+
+    private FeedDecorator() {}
+}

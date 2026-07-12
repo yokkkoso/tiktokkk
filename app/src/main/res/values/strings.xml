@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">tiktokkk</string>
+    <string name="xposed_description">TikTok tweaks: like/follow/comment confirmation, FYP upload timestamp, always-on progress bar, profile post stats, region + SIM spoof, anonymous profile view, hide Plus button.  •  https://yokkkoso.me</string>
+    <string-array name="xposed_scope">
+        <item>com.zhiliaoapp.musically</item>
+        <item>com.ss.android.ugc.trill</item>
+    </string-array>
+</resources>

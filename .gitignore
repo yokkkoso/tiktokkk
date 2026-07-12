@@ -1,0 +1,41 @@
+# Build outputs
+/build/
+/app/build/
+**/build/
+
+# Gradle
+.gradle/
+
+# Local / machine-specific
+local.properties
+keystore.properties
+signing.properties
+.env
+
+# Signing material — never commit
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+*.idsig
+
+# APK / large binary artifacts
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
