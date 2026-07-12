@@ -35,6 +35,12 @@ public final class Ids {
     public static final List<String> AVATAR_IMG = Arrays.asList("user_avatar", "vnh");
     public static final List<String> COMMENT_SHEET = Arrays.asList("ecj", "ec6", "i4h");
     public static final String DRAWER_LIST = "s2b";                  // profile side-drawer menu list
+    public static final List<String> STORY_MARKERS = Arrays.asList(
+            "vp_story_collection", "vp_story_immersive_feed");        // story player container
+    public static final String LIKE_ICON_ACTIVE = "video_like_icon_active";     // liked state
+    public static final String LIKE_ICON_INACTIVE = "video_like_icon_inactive"; // not-liked state
+    public static final List<String> QUICK_SHARE = Arrays.asList("xz0");        // "Share with <friend>" pill label
+    public static final List<String> QUICK_REPOST = Arrays.asList("tv_upvote"); // "Repost to followers" label
 
     public static String nameOf(View v) {
         try {

@@ -126,62 +126,47 @@ public class TikToKKK implements IXposedHookLoadPackage {
 
     private boolean confirmsOrChooserActive() {
         return Prefs.is(Prefs.CONFIRM_LIKE) || Prefs.is(Prefs.CONFIRM_UNLIKE)
-                || Prefs.is(Prefs.CONFIRM_FOLLOW)
-                || Prefs.is(Prefs.CONFIRM_COMMENT_LIKE) || Prefs.is(Prefs.CONFIRM_DISLIKE_COMMENT)
-                || Prefs.is(Prefs.CONFIRM_STORY_LIKE) || Prefs.is(Prefs.CONFIRM_QUICK_SHARE)
-                || Prefs.is(Prefs.CONFIRM_QUICK_REPOST);
+                || Prefs.is(Prefs.CONFIRM_FOLLOW) || Prefs.is(Prefs.CONFIRM_STORY_LIKE)
+                || Prefs.is(Prefs.CONFIRM_QUICK_SHARE) || Prefs.is(Prefs.CONFIRM_QUICK_REPOST);
     }
 
     private boolean idBtn(View v, java.util.List<String> ids) {
         return Ids.inSubtreeExact(v, ids, 4) || Ids.inAncestryExact(v, ids, 2);
     }
 
+    // Comment like/dislike -> CommentConfirm, favorite -> FavoriteConfirm (model-layer). Like/unlike
+    // and follow are blocked here at View.performClick, BEFORE TikTok's optimistic UI toggle - a
+    // model-method block runs too late (the heart/Follow state already flipped). Detection is id-based
+    // (LIKE_BTN, FOLLOW_BTN, STORY_MARKERS, QUICK_SHARE, QUICK_REPOST); only the like-vs-unlike
+    // direction still reads content-desc, since no id/model distinguishes it without side effects.
     private String promptFor(View v) {
+        boolean storyCtx = Ids.inAncestryExact(v, Ids.STORY_MARKERS, 24)
+                || Ids.inSubtreeExact(v, Ids.STORY_MARKERS, 6);
+        boolean shareQuick = Ids.inSubtreeExact(v, Ids.QUICK_SHARE, 6)
+                || Ids.inAncestryExact(v, Ids.QUICK_SHARE, 3);
+        boolean repostQuick = Ids.inSubtreeExact(v, Ids.QUICK_REPOST, 6)
+                || Ids.inAncestryExact(v, Ids.QUICK_REPOST, 3);
+
+        boolean unlikeDesc = false;
         java.util.List<String> descs = new java.util.ArrayList<>();
         collectUp(v, descs, 2);
         collectDown(v, descs, 4);
-
-        boolean storyCtx = false, commentCtx = false, unlikeDesc = false;
-        boolean followDesc = false, repostDesc = false, likeCommentDesc = false, dislikeDesc = false;
-        boolean shareQuick = false;
         for (String d : descs) {
-            if (d.startsWith("поделиться с ") || d.startsWith("share with ")) shareQuick = true;
-            if (d.contains("истори") || d.contains("story")) storyCtx = true;
-            if (d.contains("коммент") || d.contains("comment")) commentCtx = true;
             if (d.startsWith("unlike") || d.startsWith("убрать лайк") || d.startsWith("отменить лайк")
                     || d.startsWith("удалить лайк") || d.startsWith("вам понравилось")
                     || d.startsWith("you liked") || d.contains("понравилось это видео")) unlikeDesc = true;
-            if ((d.startsWith("follow") && !d.startsWith("following")
-                    && !d.startsWith("followers") && !d.startsWith("unfollow"))
-                    || d.startsWith("подписаться")) followDesc = true;
-            // only the quick-repost button, NOT the profile "Reposts" tab (bare "репост")
-            if (d.startsWith("репост подписчикам") || d.startsWith("repost to")
-                    || d.startsWith("quick repost")) repostDesc = true;
-            if (d.startsWith("like comment") || d.equals("палец вверх") || d.equals("thumbs up")
-                    || (d.contains("comment") && d.contains("like"))) likeCommentDesc = true;
-            if (d.startsWith("dislike") || d.equals("палец вниз") || d.equals("thumbs down")
-                    || d.contains("не нравится") || d.contains("понизить")) dislikeDesc = true;
         }
 
         boolean likeBtn = idBtn(v, Ids.LIKE_BTN);
-        boolean followBtn = idBtn(v, Ids.FOLLOW_BTN);
-        boolean commentLikeBtn = idBtn(v, Ids.COMMENT_LIKE);
-
-        boolean unlikeVideo = likeBtn && unlikeDesc;
-        boolean likeVideo = likeBtn && !unlikeDesc && !commentCtx && !storyCtx;
         boolean storyLike = likeBtn && storyCtx;
-        boolean likeComment = commentLikeBtn || likeCommentDesc;
-        boolean dislikeComment = dislikeDesc;
-        boolean follow = followBtn || followDesc;
-        boolean share = shareQuick;
-        boolean repost = repostDesc;
+        boolean unlikeVideo = likeBtn && unlikeDesc;
+        boolean likeVideo = likeBtn && !unlikeDesc && !storyCtx;
+        boolean follow = idBtn(v, Ids.FOLLOW_BTN);
 
         if (Prefs.is(Prefs.CONFIRM_FOLLOW) && follow) return Loc.t("Follow this account?");
-        if (Prefs.is(Prefs.CONFIRM_COMMENT_LIKE) && likeComment) return Loc.t("Like this comment?");
-        if (Prefs.is(Prefs.CONFIRM_DISLIKE_COMMENT) && dislikeComment) return Loc.t("Dislike this comment?");
         if (Prefs.is(Prefs.CONFIRM_STORY_LIKE) && storyLike) return Loc.t("Like this story?");
-        if (Prefs.is(Prefs.CONFIRM_QUICK_REPOST) && repost) return Loc.t("Repost this video?");
-        if (Prefs.is(Prefs.CONFIRM_QUICK_SHARE) && share) return Loc.t("Share this video?");
+        if (Prefs.is(Prefs.CONFIRM_QUICK_REPOST) && repostQuick) return Loc.t("Repost this video?");
+        if (Prefs.is(Prefs.CONFIRM_QUICK_SHARE) && shareQuick) return Loc.t("Share this video?");
         if (Prefs.is(Prefs.CONFIRM_UNLIKE) && unlikeVideo) return Loc.t("Remove like from this video?");
         if (Prefs.is(Prefs.CONFIRM_LIKE) && likeVideo) return Loc.t("Like this video?");
         return null;
