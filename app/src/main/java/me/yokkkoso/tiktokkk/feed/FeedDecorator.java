@@ -159,19 +159,18 @@ public final class FeedDecorator {
         } catch (Throwable ignored) {}
     }
 
+    // Match the search-suggestion TextView by id (ubg) and hide the bar's root container (ht2) —
+    // resource-ids are language-independent, unlike the "Поиск ·"/"Search ·" text.
     private static void hideSearchBar(final TextView tv) {
         if (!Prefs.is(Prefs.HIDE_SEARCH_BAR)) return;
         try {
-            CharSequence t = tv.getText();
-            if (t == null) return;
-            String s = t.toString().trim().toLowerCase(Locale.ROOT);
-            if (!(s.startsWith("поиск ·") || s.startsWith("поиск·")
-                    || s.startsWith("search ·") || s.startsWith("search·"))) return;
+            if (!"ubg".equals(Ids.nameOf(tv))) return;
             Runnable hide = () -> {
                 View cur = tv;
                 for (int i = 0; i < 6 && cur.getParent() instanceof View; i++) {
                     cur = (View) cur.getParent();
-                    if (cur.isClickable() && cur.getHeight() < 400) {
+                    if ("ht2".equals(Ids.nameOf(cur))
+                            || (cur.isClickable() && cur.getHeight() < 400)) {
                         cur.setVisibility(View.GONE);
                         return;
                     }
