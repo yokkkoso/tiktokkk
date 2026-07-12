@@ -3,7 +3,9 @@
 Xposed/LSPosed module for the Android TikTok app, with added tweaks and fixes.
 
 <p align="center">
-  <img src="assets/settings-menu.png" alt="tiktokkk settings" width="320">
+  <img src="assets/settings-entry.png" alt="mod settings entry under Settings and privacy" width="300">
+  &nbsp;&nbsp;
+  <img src="assets/settings-menu.png" alt="tiktokkk settings panel" width="300">
 </p>
 
 > ❗❗❗ **Only TikTok `46.0.3` is supported.** ❗❗❗
