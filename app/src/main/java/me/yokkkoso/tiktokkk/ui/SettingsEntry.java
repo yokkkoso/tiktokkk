@@ -43,16 +43,27 @@ public final class SettingsEntry {
         TikToKKK.log("settings entry installed");
     }
 
-    private static void inject(View v) {
-        if (!(v instanceof ViewGroup) || !Ids.DRAWER_LIST.equals(Ids.nameOf(v))) return;
-        final ViewGroup list = (ViewGroup) v;
-        // add once per drawer instance (native rows land shortly after the list itself)
+    private static void inject(View added) {
+        // Fire both when the drawer list (s2b) itself is added and when any row is added under it,
+        // so a missed list-add or a re-population (removeAllViews + re-add) still gets our row.
+        final ViewGroup list = drawerList(added);
+        if (list == null) return;
         MAIN.postDelayed(() -> {
             try {
                 if (list.findViewWithTag(TAG) != null) return;
                 list.addView(row(list.getContext()));   // append -> under the last item (Settings & privacy)
             } catch (Throwable ignored) {}
         }, 400);
+    }
+
+    // The s2b list, found from the added view itself or a nearby ancestor.
+    private static ViewGroup drawerList(View v) {
+        for (int i = 0; i < 4 && v != null; i++) {
+            if (v instanceof ViewGroup && Ids.DRAWER_LIST.equals(Ids.nameOf(v))) return (ViewGroup) v;
+            android.view.ViewParent p = v.getParent();
+            v = (p instanceof View) ? (View) p : null;
+        }
+        return null;
     }
 
     private static TextView row(Context c) {

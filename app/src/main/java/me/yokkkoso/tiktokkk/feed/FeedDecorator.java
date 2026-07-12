@@ -52,6 +52,20 @@ public final class FeedDecorator {
         } catch (Throwable t) {
             TikToKKK.log("feed decorator install failed: " + t);
         }
+        try {
+            // TikTok re-shows the fast-search bar after we hide it, so a one-shot GONE loses. Force
+            // the bar's root (ht2) to stay hidden by intercepting every attempt to make it visible.
+            XposedHelpers.findAndHookMethod(View.class, "setVisibility", int.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) {
+                    if ((int) param.args[0] == View.VISIBLE
+                            && Prefs.is(Prefs.HIDE_SEARCH_BAR)
+                            && Ids.SEARCH_BAR_ROOT.equals(Ids.nameOf((View) param.thisObject))) {
+                        param.args[0] = View.GONE;
+                    }
+                }
+            });
+        } catch (Throwable ignored) {}
     }
 
     private static void stampTitle(TextView tv) {
