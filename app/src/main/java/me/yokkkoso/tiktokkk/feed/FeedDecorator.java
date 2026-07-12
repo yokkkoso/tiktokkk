@@ -42,7 +42,12 @@ public final class FeedDecorator {
                     hideSearchAiButton(tv);
                     String id = Ids.nameOf(tv);
                     if (id == null) return;
-                    if (id.equals("title")) stampTitle(tv);
+                    // Defer: the native tv_post_time date is populated shortly AFTER the title, so
+                    // stamping immediately can't see it and would produce a double date. Let it land.
+                    if (id.equals("title")) {
+                        final TextView t = tv;
+                        t.postDelayed(() -> stampTitle(t), 350);
+                    }
                 }
             });
         } catch (Throwable t) {
@@ -51,35 +56,30 @@ public final class FeedDecorator {
     }
 
     private static void stampTitle(TextView tv) {
-        boolean showDate = Prefs.is(Prefs.SHOW_FYP_TIMESTAMP);
-        boolean showFlag = Prefs.is(Prefs.SHOW_POST_REGION);
-        if (!showDate && !showFlag) return;
-        if (nativeDateNearby(tv)) return;
+        // Flag shows everywhere; the custom DATE only where TikTok has no native date (FYP) — else
+        // it would double the date on Following/detail posts (which carry a native tv_post_time).
+        boolean wantDate = Prefs.is(Prefs.SHOW_FYP_TIMESTAMP) && !nativeDateNearby(tv);
+        boolean wantFlag = Prefs.is(Prefs.SHOW_POST_REGION);
+        if (!wantDate && !wantFlag) return;
         try {
             CharSequence t = tv.getText();
             if (t == null) return;
             String s = t.toString();
-            if (s.isEmpty() || s.length() > 80) return;
-            long ct = AuthorDates.forHandle(s);
-            if (ct <= 0) return;
+            if (s.isEmpty() || s.length() > 80 || s.contains("  ·  ")) return;   // last: already stamped
 
-            String region = showFlag ? AuthorDates.regionForHandle(s) : null;
+            String region = wantFlag ? AuthorDates.regionForHandle(s) : null;
             String flag = region != null && region.length() == 2 ? Countries.flag(region) : null;
-            if (flag == null && !showDate) return;
-            String display = s.length() > 18 ? s.substring(0, 18).trim() + "…" : s;
+            long ct = wantDate ? AuthorDates.forHandle(s) : 0;
+            boolean hasDate = ct > 0;
+            if (flag == null && !hasDate) return;
 
+            String display = s.length() > 18 ? s.substring(0, 18).trim() + "…" : s;
             SpannableStringBuilder sb = new SpannableStringBuilder();
-            int flagEnd = 0;
-            if (flag != null) {
-                sb.append(flag).append("  ·  ");
-                flagEnd = sb.length();
-            }
+            if (flag != null) sb.append(flag).append("  ·  ");
             sb.append(display);
-            int dateStart = sb.length();
-            if (showDate) {
+            if (hasDate) {
+                int dateStart = sb.length();
                 sb.append("  ·  ").append(formatDate(ct));
-            }
-            if (showDate) {
                 sb.setSpan(new ForegroundColorSpan(DIM), dateStart, sb.length(),
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }

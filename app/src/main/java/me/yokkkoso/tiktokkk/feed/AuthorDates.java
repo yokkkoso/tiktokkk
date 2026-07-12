@@ -4,7 +4,7 @@ import me.yokkkoso.tiktokkk.Prefs;
 import me.yokkkoso.tiktokkk.TikToKKK;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -13,9 +13,21 @@ import de.robv.android.xposed.XposedHelpers;
 public final class AuthorDates {
 
     private static final String AWEME = "com.ss.android.ugc.aweme.feed.model.Aweme";
-    private static final Map<String, Long> DATES = Collections.synchronizedMap(new HashMap<>());
-    private static final Map<String, String> REGIONS = Collections.synchronizedMap(new HashMap<>());
+    private static final int CAP = 5000;
+    // LRU, not a HashMap that clears wholesale at a threshold — a mass clear made previously-stamped
+    // posts lose their flag/date on rebind (only a TikTok restart brought them back).
+    private static final Map<String, Long> DATES = lru();
+    private static final Map<String, String> REGIONS = lru();
     private static int STORES = 0;
+
+    private static <V> Map<String, V> lru() {
+        return Collections.synchronizedMap(new LinkedHashMap<String, V>(64, 0.75f, false) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, V> eldest) {
+                return size() > CAP;
+            }
+        });
+    }
 
     public static void install(ClassLoader cl) {
         try {
@@ -28,10 +40,6 @@ public final class AuthorDates {
                         if (t <= 0) return;
                         Object author = XposedHelpers.getObjectField(param.thisObject, "author");
                         if (author == null) return;
-                        if (DATES.size() > 1500) {
-                            DATES.clear();
-                            REGIONS.clear();
-                        }
                         String uid = strCall(author, "getUniqueId");
                         String nick = strCall(author, "getNickname");
                         put(uid, t);
