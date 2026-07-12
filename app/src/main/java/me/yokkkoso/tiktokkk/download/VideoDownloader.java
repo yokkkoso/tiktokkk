@@ -190,15 +190,15 @@ public final class VideoDownloader {
     }
 
     private static void hqDownload(final Activity a, final Object aweme, final String id) {
-        toast(a, Loc.t("Downloading HQ…"));
+        progress(a, Loc.t("Resolving HQ…"));
         new Thread(() -> {
-            String url = tikwmHd(aweme, id);
-            boolean ok = url != null && writeToGallery(a, url, false);
+            String url = tikwmHd(aweme, id, a);
+            boolean ok = url != null && writeToGallery(a, url, false, a);
             if (ok) {
                 a.runOnUiThread(() -> toast(a, Loc.t("Saved to gallery")));
             } else {
                 a.runOnUiThread(() -> {
-                    toast(a, Loc.t("HQ unavailable — pick a quality"));
+                    toast(a, Loc.t("HQ unavailable - pick a quality"));
                     showPicker(a, aweme);
                 });
             }
@@ -213,7 +213,7 @@ public final class VideoDownloader {
         return "";
     }
 
-    private static String tikwmHd(Object aweme, String id) {
+    private static String tikwmHd(Object aweme, String id, Activity a) {
         String handle = Reflect.str(Reflect.call(aweme, "getAuthor"), "getUniqueId");
         if (handle.isEmpty()) handle = "i";
         String share = "https://www.tiktok.com/@" + handle + "/video/" + id;
@@ -231,6 +231,7 @@ public final class VideoDownloader {
                     break;
                 }
                 if (st == 3) break;   // failed
+                progress(a, Loc.t("Resolving HQ…") + " " + (i + 1) + "s");
                 try { Thread.sleep(1000); } catch (InterruptedException e) { break; }
             }
         } catch (Throwable ignored) {}
@@ -288,12 +289,14 @@ public final class VideoDownloader {
         }
         toast(a, Loc.t("Downloading…"));
         new Thread(() -> {
-            boolean ok = writeToGallery(a, url, image);
+            boolean ok = writeToGallery(a, url, image, null);
             a.runOnUiThread(() -> toast(a, Loc.t(ok ? "Saved to gallery" : "Save failed")));
         }).start();
     }
 
-    private static boolean writeToGallery(final Activity a, final String url, final boolean image) {
+    // prog != null -> report download percentage as a live toast (used for the long HQ download).
+    private static boolean writeToGallery(final Activity a, final String url, final boolean image,
+            final Activity prog) {
         ContentValues cv = new ContentValues();
         cv.put(MediaStore.MediaColumns.DISPLAY_NAME,
                 "tiktok_" + System.nanoTime() + (image ? ".jpg" : ".mp4"));
@@ -313,11 +316,22 @@ public final class VideoDownloader {
             conn.setRequestProperty("User-Agent", "com.ss.android.ugc.trill/2023 (Linux; Android)");
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(30000);
+            long total = conn.getContentLengthLong();
             try (InputStream in = conn.getInputStream();
                  OutputStream os = a.getContentResolver().openOutputStream(uri)) {
                 byte[] buf = new byte[65536];
                 int n;
-                while ((n = in.read(buf)) > 0) os.write(buf, 0, n);
+                long done = 0, lastNs = 0;
+                while ((n = in.read(buf)) > 0) {
+                    os.write(buf, 0, n);
+                    done += n;
+                    if (prog != null && System.nanoTime() - lastNs > 400_000_000L) {
+                        lastNs = System.nanoTime();
+                        String p = total > 0 ? (done * 100 / total) + "%"
+                                : (done / 1048576) + " MB";
+                        progress(prog, Loc.t("Downloading HQ…") + " " + p);
+                    }
+                }
             }
             ok = true;
         } catch (Throwable t) {
@@ -333,6 +347,19 @@ public final class VideoDownloader {
 
     private static void toast(Context c, String m) {
         Toast.makeText(c, m, Toast.LENGTH_SHORT).show();
+    }
+
+    private static Toast progToast;
+
+    // A single reused toast, re-shown so it stays visible through the long HQ resolve + download.
+    private static void progress(final Activity a, final String msg) {
+        a.runOnUiThread(() -> {
+            try {
+                if (progToast == null) progToast = Toast.makeText(a, msg, Toast.LENGTH_SHORT);
+                else progToast.setText(msg);
+                progToast.show();
+            } catch (Throwable ignored) {}
+        });
     }
 
     private VideoDownloader() {}

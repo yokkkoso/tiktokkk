@@ -145,6 +145,9 @@ public final class Loc {
         M.put("No video", "Нет видео");
         M.put("No download URL", "Нет ссылки для загрузки");
         M.put("Downloading…", "Скачивание…");
+        M.put("Resolving HQ…", "Получаю HQ…");
+        M.put("Downloading HQ…", "Загрузка HQ…");
+        M.put("HQ unavailable - pick a quality", "HQ недоступно - выберите качество");
         M.put("Saved to gallery", "Сохранено в галерею");
         M.put("Original", "Оригинал");
         M.put("Standard", "Стандарт");
