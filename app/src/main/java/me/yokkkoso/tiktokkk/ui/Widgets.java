@@ -2,6 +2,7 @@ package me.yokkkoso.tiktokkk.ui;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.util.TypedValue;
@@ -11,9 +12,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import me.yokkkoso.tiktokkk.Loc;
+import me.yokkkoso.tiktokkk.Prefs;
 
 public final class Widgets {
 
@@ -114,6 +117,37 @@ public final class Widgets {
         dot.setLayoutParams(new LinearLayout.LayoutParams(Theme.dp(a, 22), Theme.dp(a, 22)));
         row.addView(dot);
         return row;
+    }
+
+    public static View sliderRow(Activity a, String label, String pref, int def, int min, int max) {
+        LinearLayout col = new LinearLayout(a);
+        col.setOrientation(LinearLayout.VERTICAL);
+        int pad = Theme.dp(a, 14);
+        col.setPadding(pad, Theme.dp(a, 12), pad, Theme.dp(a, 8));
+        int cur = Math.max(min, Math.min(max, Prefs.getInt(pref, def)));
+        final TextView t = new TextView(a);
+        t.setText(Loc.t(label) + ":  " + cur + "%");
+        t.setTextColor(Theme.TEXT);
+        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        col.addView(t);
+
+        SeekBar sb = new SeekBar(a);
+        sb.setMax(max - min);
+        sb.setProgress(cur - min);
+        sb.getProgressDrawable().setColorFilter(Theme.ACCENT, PorterDuff.Mode.SRC_IN);
+        if (sb.getThumb() != null) sb.getThumb().setColorFilter(Theme.ACCENT, PorterDuff.Mode.SRC_IN);
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar s, int p, boolean fromUser) {
+                int v = min + p;
+                Prefs.setInt(pref, v);
+                t.setText(Loc.t(label) + ":  " + v + "%");
+            }
+            @Override public void onStartTrackingTouch(SeekBar s) {}
+            @Override public void onStopTrackingTouch(SeekBar s) {}
+        });
+        col.addView(sb);
+        return col;
     }
 
     public static View actionRow(Activity a, String title, Runnable onClick) {

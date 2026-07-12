@@ -26,6 +26,7 @@ public final class Loc {
         M.put("Language", "Язык");
         M.put("Misc", "Разное");
         M.put("Accent color", "Цвет акцента");
+        M.put("Download button opacity", "Прозрачность кнопки загрузки");
         M.put("Export settings", "Экспорт настроек");
         M.put("Import settings", "Импорт настроек");
         M.put("Reset settings", "Сброс настроек");

@@ -57,6 +57,7 @@ public final class Prefs {
     public static final String LOCALE = "mod_locale";
     public static final String ACCENT_COLOR = "accent_color";
     public static final int DEFAULT_ACCENT = 0xFFFC0FC0;
+    public static final String FAB_OPACITY = "fab_opacity";   // download button opacity, 0-100 %
 
     private static final Map<String, Boolean> BOOL_DEFAULTS = new LinkedHashMap<>();
     static {
@@ -183,6 +184,7 @@ public final class Prefs {
         sb.append(REGION).append('=').append(getString(REGION, "US")).append('\n');
         sb.append(LOCALE).append('=').append(getString(LOCALE, "")).append('\n');
         sb.append(ACCENT_COLOR).append('=').append(accentColor()).append('\n');
+        sb.append(FAB_OPACITY).append('=').append(getInt(FAB_OPACITY, 25)).append('\n');
         return sb.toString();
     }
 
@@ -199,7 +201,8 @@ public final class Prefs {
             if (BOOL_DEFAULTS.containsKey(k)) {
                 e.putBoolean(k, "true".equalsIgnoreCase(v));
                 n++;
-            } else if (REGION.equals(k) || LOCALE.equals(k) || ACCENT_COLOR.equals(k)) {
+            } else if (REGION.equals(k) || LOCALE.equals(k) || ACCENT_COLOR.equals(k)
+                    || FAB_OPACITY.equals(k)) {
                 e.putString(k, v);
                 n++;
             }

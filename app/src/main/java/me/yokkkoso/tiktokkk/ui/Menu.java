@@ -160,6 +160,8 @@ public final class Menu {
         LinearLayout g = Widgets.groupCard(a);
         g.addView(row(a, Prefs.SANITIZE_LINKS));
         g.addView(Widgets.divider(a));
+        g.addView(Widgets.sliderRow(a, "Download button opacity", Prefs.FAB_OPACITY, 25, 0, 100));
+        g.addView(Widgets.divider(a));
         g.addView(Widgets.accentRow(a));
         g.addView(Widgets.divider(a));
         g.addView(Widgets.actionRow(a, "Export settings", () -> exportSettings(a)));

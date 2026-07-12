@@ -52,7 +52,7 @@ public final class OverlayFab {
         dl.setGravity(Gravity.CENTER);
         GradientDrawable bg = new GradientDrawable();
         bg.setShape(GradientDrawable.OVAL);
-        bg.setColor(Theme.FAB_BG);
+        bg.setColor(fabColor());
         dl.setBackground(bg);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(Theme.dp(a, 48), Theme.dp(a, 48));
         lp.gravity = Gravity.TOP | Gravity.END;
@@ -76,6 +76,9 @@ public final class OverlayFab {
         try {
             View down = decor.findViewWithTag(DL_TAG);
             if (down == null) return;
+            if (down.getBackground() instanceof GradientDrawable) {
+                ((GradientDrawable) down.getBackground()).setColor(fabColor());
+            }
             boolean post = onPost(decor, 0);
             down.setVisibility(post && Prefs.is(Prefs.SHOW_DL_BUTTON) ? View.VISIBLE : View.GONE);
         } catch (Throwable ignored) {}
@@ -92,6 +95,12 @@ public final class OverlayFab {
             }
         }
         return false;
+    }
+
+    // Black with user-selected alpha (opacity %). Default 25% (the old FAB_BG).
+    private static int fabColor() {
+        int pct = Math.max(0, Math.min(100, Prefs.getInt(Prefs.FAB_OPACITY, 25)));
+        return (pct * 255 / 100) << 24;
     }
 
     private OverlayFab() {}
