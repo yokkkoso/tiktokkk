@@ -13,9 +13,9 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
-// Favoriting a video routes through AwemeCollectionAgent.collect(String,Map,Function2,Function2).
-// Adding and removing are separate methods (collect vs unCollect), so hooking collect alone
-// confirms only the ADD, never the undo.
+// Favoriting a video routes through AwemeCollectionAgent.collect(String,Map,Function2,Function2);
+// removing routes through unCollect(...). They are separate methods, so each confirmation gates
+// only its own direction.
 public final class FavoriteConfirm {
 
     private static final String AGENT =
@@ -43,18 +43,21 @@ public final class FavoriteConfirm {
         }
         int n = 0;
         try {
-            n = XposedBridge.hookAllMethods(agent, "collect", handler()).size();
+            n += XposedBridge.hookAllMethods(agent, "collect", handler(true)).size();
+        } catch (Throwable ignored) {}
+        try {
+            n += XposedBridge.hookAllMethods(agent, "unCollect", handler(false)).size();
         } catch (Throwable ignored) {}
         TikToKKK.log("favorite confirm installed (" + n + " methods)");
     }
 
-    private static XC_MethodHook handler() {
+    private static XC_MethodHook handler(final boolean add) {
         return new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) {
                 if (Boolean.TRUE.equals(BYPASS.get())) return;
                 try {
-                    if (!Prefs.is(Prefs.CONFIRM_FAVORITE)) return;
+                    if (!Prefs.is(add ? Prefs.CONFIRM_FAVORITE : Prefs.CONFIRM_UNFAVORITE)) return;
                     final Activity a = top;
                     if (a == null || a.isFinishing()) return;
 
@@ -62,7 +65,7 @@ public final class FavoriteConfirm {
                     final Object agent = param.thisObject;
                     final Object[] args = param.args.clone();
                     final Method m = (Method) param.method;
-                    final String msg = Loc.t("Add to favorites?");
+                    final String msg = Loc.t(add ? "Add to favorites?" : "Remove from favorites?");
                     a.runOnUiThread(() -> {
                         try {
                             new AlertDialog.Builder(a, android.R.style.Theme_Material_Dialog_Alert)

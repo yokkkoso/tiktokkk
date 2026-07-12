@@ -2,6 +2,10 @@
 
 Xposed/LSPosed module for the Android TikTok app, with added tweaks and fixes.
 
+<p align="center">
+  <img src="assets/settings-menu.png" alt="tiktokkk settings" width="320">
+</p>
+
 > ❗❗❗ **Only TikTok `46.0.3` is supported.** ❗❗❗
 > Detection relies on TikTok's hardcoded (obfuscated) resource-ids and model symbols, which change
 > on every TikTok update - on any other version features will silently misbehave or do nothing. The
@@ -9,7 +13,8 @@ Xposed/LSPosed module for the Android TikTok app, with added tweaks and fixes.
 
 This project bundles a set of quality-of-life tweaks for TikTok - ad and clutter filtering, action
 confirmations, unrestricted and high-quality downloads, region spoofing, profile helpers, and more -
-all configurable from an in-app settings panel (a small **⚙️** button on your own TikTok profile page).
+all configurable from an in-app settings panel, opened from **⚙️ tiktokkk - Mod settings** under
+TikTok's own *Settings and privacy* menu.
 
 When building from source, the module is compiled against the Android SDK and injected into TikTok
 as either a rooted **LSPosed** module or a rootless **LSPatch** patch - see [Install](#install).

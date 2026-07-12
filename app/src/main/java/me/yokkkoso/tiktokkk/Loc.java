@@ -183,6 +183,9 @@ public final class Loc {
         M.put("Confirm before favorite", "Подтверждать добавление в избранное");
         M.put("Ask before adding a video to favorites", "Спрашивать перед добавлением в избранное");
         M.put("Add to favorites?", "Добавить в избранное?");
+        M.put("Confirm before unfavorite", "Подтверждать удаление из избранного");
+        M.put("Ask before removing a video from favorites", "Спрашивать перед удалением из избранного");
+        M.put("Remove from favorites?", "Убрать из избранного?");
         M.put("Logs", "Логи");
         M.put("Share", "Поделиться");
         M.put("Clear", "Очистить");
