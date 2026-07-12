@@ -65,8 +65,7 @@ public final class StickerDownload {
 
     private static boolean inComment(View v) {
         for (int i = 0; i < 16 && v != null; i++) {
-            String id = Ids.nameOf(v);
-            if ("ecj".equals(id) || "ec6".equals(id) || "i4h".equals(id)) return true;
+            if (Ids.COMMENT_SHEET.contains(Ids.nameOf(v))) return true;
             ViewParent p = v.getParent();
             v = (p instanceof View) ? (View) p : null;
         }
@@ -83,13 +82,11 @@ public final class StickerDownload {
         return false;
     }
 
+    // 46.0.3: the enlarged-sticker viewer carries a report (fri) and close (fqe) button.
     private static boolean hasReport(View v, int depth) {
         if (v == null || depth < 0) return false;
-        CharSequence d = v.getContentDescription();
-        if (d != null) {
-            String s = d.toString().toLowerCase(java.util.Locale.ROOT);
-            if (s.contains("пожаловаться") || s.contains("report")) return true;
-        }
+        String id = Ids.nameOf(v);
+        if (Ids.STICKER_REPORT.equals(id) || Ids.STICKER_CLOSE.equals(id)) return true;
         if (v instanceof ViewGroup) {
             ViewGroup g = (ViewGroup) v;
             for (int i = 0; i < g.getChildCount(); i++) {

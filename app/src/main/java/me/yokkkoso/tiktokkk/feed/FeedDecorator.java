@@ -11,7 +11,6 @@ import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -44,7 +43,7 @@ public final class FeedDecorator {
                     if (id == null) return;
                     // Defer: the native tv_post_time date is populated shortly AFTER the title, so
                     // stamping immediately can't see it and would produce a double date. Let it land.
-                    if (id.equals("title")) {
+                    if (Ids.TITLE.equals(id)) {
                         final TextView t = tv;
                         t.postDelayed(() -> stampTitle(t), 350);
                     }
@@ -106,7 +105,7 @@ public final class FeedDecorator {
         if (v == null || depth > 5) return false;
         // Only a VISIBLE, non-empty native date counts — the FYP layout keeps a hidden/empty
         // tv_post_time in the tree, which must not suppress our stamp.
-        if ("tv_post_time".equals(Ids.nameOf(v)) && v.getVisibility() == View.VISIBLE
+        if (Ids.POST_TIME.equals(Ids.nameOf(v)) && v.getVisibility() == View.VISIBLE
                 && v instanceof TextView) {
             CharSequence t = ((TextView) v).getText();
             if (t != null && t.length() > 0) return true;
@@ -137,25 +136,20 @@ public final class FeedDecorator {
         return d + (Loc.isRu() ? "д назад" : "d ago");
     }
 
+    // 46.0.3: the "Find similar" tag = label id fb + icon fa inside container bq/br.
     private static void hideFindSimilar(TextView tv) {
         if (!Prefs.is(Prefs.HIDE_FIND_SIMILAR)) return;
         try {
-            if (!(tv.getParent() instanceof ViewGroup)) return;
-            ViewGroup row = (ViewGroup) tv.getParent();
-            boolean findIcon = false;
-            for (int i = 0; i < row.getChildCount(); i++) {
-                CharSequence d = row.getChildAt(i).getContentDescription();
-                if (d == null) continue;
-                String ds = d.toString().trim().toLowerCase(Locale.ROOT);
-                if (ds.equals("найти") || ds.equals("find")) {
-                    findIcon = true;
-                    break;
+            if (!Ids.FIND_SIMILAR_LABEL.equals(Ids.nameOf(tv))) return;
+            View target = tv;
+            for (int i = 0; i < 3 && target.getParent() instanceof View; i++) {
+                target = (View) target.getParent();
+                String id = Ids.nameOf(target);
+                if (Ids.FIND_SIMILAR_BOX.contains(id)) {
+                    target.setVisibility(View.GONE);
+                    return;
                 }
             }
-            if (!findIcon) return;
-            View target = row;
-            if (target.getParent() instanceof View) target = (View) target.getParent();
-            target.setVisibility(View.GONE);
         } catch (Throwable ignored) {}
     }
 
@@ -164,12 +158,12 @@ public final class FeedDecorator {
     private static void hideSearchBar(final TextView tv) {
         if (!Prefs.is(Prefs.HIDE_SEARCH_BAR)) return;
         try {
-            if (!"ubg".equals(Ids.nameOf(tv))) return;
+            if (!Ids.SEARCH_BAR_SUGGEST.equals(Ids.nameOf(tv))) return;
             Runnable hide = () -> {
                 View cur = tv;
                 for (int i = 0; i < 6 && cur.getParent() instanceof View; i++) {
                     cur = (View) cur.getParent();
-                    if ("ht2".equals(Ids.nameOf(cur))
+                    if (Ids.SEARCH_BAR_ROOT.equals(Ids.nameOf(cur))
                             || (cur.isClickable() && cur.getHeight() < 400)) {
                         cur.setVisibility(View.GONE);
                         return;
@@ -181,25 +175,17 @@ public final class FeedDecorator {
         } catch (Throwable ignored) {}
     }
 
+    // 46.0.3: the search "Ask"/Tako AI entrance = label id tv_tab_tako_entrance inside container iaf.
     private static void hideSearchAiButton(TextView tv) {
         if (!Prefs.is(Prefs.HIDE_AI_ASSISTANT)) return;
         try {
-            CharSequence t = tv.getText();
-            if (t == null) return;
-            String s = t.toString().trim().toLowerCase(Locale.ROOT);
-            if (!(s.equals("лучшее") || s.equals("top"))) return;
-            View strip = tv;
-            for (int i = 0; i < 10 && !(strip instanceof HorizontalScrollView); i++) {
-                if (!(strip.getParent() instanceof View)) return;
-                strip = (View) strip.getParent();
-            }
-            if (!(strip instanceof HorizontalScrollView)
-                    || !(strip.getParent() instanceof ViewGroup)) return;
-            ViewGroup holder = (ViewGroup) strip.getParent();
-            for (int i = 0; i < holder.getChildCount(); i++) {
-                View c = holder.getChildAt(i);
-                if (c != strip && c.getWidth() > 0 && c.getWidth() < 160 && c.getLeft() < 40) {
-                    c.setVisibility(View.GONE);
+            if (!Ids.SEARCH_AI_LABEL.equals(Ids.nameOf(tv))) return;
+            View cur = tv;
+            for (int i = 0; i < 6 && cur.getParent() instanceof View; i++) {
+                cur = (View) cur.getParent();
+                if (Ids.SEARCH_AI_BOX.equals(Ids.nameOf(cur))) {
+                    cur.setVisibility(View.GONE);
+                    return;
                 }
             }
         } catch (Throwable ignored) {}

@@ -142,13 +142,10 @@ public final class ProfileExtras {
         return false;
     }
 
+    // 46.0.3: the fullscreen viewer's close (X) button is id e2o (language-independent).
     private static boolean hasCloseButton(View v, int depth) {
         if (v == null || depth < 0) return false;
-        CharSequence d = v.getContentDescription();
-        if (d != null) {
-            String s = d.toString().trim().toLowerCase(Locale.ROOT);
-            if (s.equals("закрыть") || s.equals("close")) return true;
-        }
+        if (Ids.VIEWER_CLOSE.equals(Ids.nameOf(v))) return true;
         if (v instanceof ViewGroup) {
             ViewGroup g = (ViewGroup) v;
             for (int i = 0; i < g.getChildCount(); i++) {
@@ -166,14 +163,12 @@ public final class ProfileExtras {
             String s = d.toString().toLowerCase(Locale.ROOT);
             if (s.startsWith("профиль ") || s.startsWith("profile ")) return true;
         }
-        String id = Ids.nameOf(v);
-        return "user_avatar".equals(id) || "vnh".equals(id);
+        return Ids.AVATAR_IMG.contains(Ids.nameOf(v));
     }
 
     private static boolean inComment(View v) {
         for (int i = 0; i < 16 && v != null; i++) {
-            String id = Ids.nameOf(v);
-            if ("ecj".equals(id) || "ec6".equals(id) || "i4h".equals(id)) return true;
+            if (Ids.COMMENT_SHEET.contains(Ids.nameOf(v))) return true;
             android.view.ViewParent p = v.getParent();
             v = (p instanceof View) ? (View) p : null;
         }
@@ -182,7 +177,7 @@ public final class ProfileExtras {
 
     // 46.0.3: the profile follower/following count labels are id s5x (language-independent).
     private static boolean isFollowersLabel(View v) {
-        return v instanceof TextView && "s5x".equals(Ids.nameOf(v));
+        return v instanceof TextView && Ids.PROFILE_COUNT.equals(Ids.nameOf(v));
     }
 
     private static void wireProfileHeader(View label) {

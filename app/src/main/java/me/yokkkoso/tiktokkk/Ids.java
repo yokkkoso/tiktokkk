@@ -19,6 +19,22 @@ public final class Ids {
     public static final List<String> AI_ASSISTANT = Arrays.asList(
             "tako", "vs_tako_entrance", "aigc_entrance", "view_stub_ep_aigc_entrance", "x_n", "xvh");
 
+    // 46.0.3 single-view ids (obfuscated, change per TikTok version) for language-independent detection.
+    public static final String TITLE = "title";                       // FYP author/title button
+    public static final String POST_TIME = "tv_post_time";            // native upload-date label
+    public static final String PROFILE_COUNT = "s5x";                 // profile follower/following count
+    public static final String SEARCH_BAR_SUGGEST = "ubg";            // inline search suggestion text
+    public static final String SEARCH_BAR_ROOT = "ht2";               // inline search bar container
+    public static final String FIND_SIMILAR_LABEL = "fb";             // "Find similar" tag label
+    public static final String SEARCH_AI_LABEL = "tv_tab_tako_entrance"; // search "Ask"/Tako entrance
+    public static final String SEARCH_AI_BOX = "iaf";                 // search AI button container
+    public static final String VIEWER_CLOSE = "e2o";                  // fullscreen viewer close (X)
+    public static final String STICKER_REPORT = "fri";               // sticker viewer report
+    public static final String STICKER_CLOSE = "fqe";                 // sticker viewer close
+    public static final List<String> FIND_SIMILAR_BOX = Arrays.asList("bq", "br");
+    public static final List<String> AVATAR_IMG = Arrays.asList("user_avatar", "vnh");
+    public static final List<String> COMMENT_SHEET = Arrays.asList("ecj", "ec6", "i4h");
+
     public static String nameOf(View v) {
         try {
             int id = v.getId();
