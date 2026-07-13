@@ -51,7 +51,7 @@ apksigner sign --ks your-key.jks app/build/outputs/apk/release/app-release-unsig
 
 ## Install
 
-Prebuilt APKs are posted in the [Telegram channel](https://t.me/tiktokkkmod), or install from the
+Prebuilt APKs are posted in the [Telegram channel](https://telegram.me/tiktokkkmod), or install from the
 F-Droid repos below for automatic updates.
 
 **F-Droid (auto-updates):** add a repo in F-Droid / Droid-ify (Settings → Repositories → +):
@@ -83,4 +83,4 @@ entirely on-device, and all other download options use only TikTok's own URLs.
 
 ## Join the Telegram channel for more info
 
-[https://t.me/tiktokkkmod](https://t.me/tiktokkkmod)
+[https://telegram.me/tiktokkkmod](https://telegram.me/tiktokkkmod)
