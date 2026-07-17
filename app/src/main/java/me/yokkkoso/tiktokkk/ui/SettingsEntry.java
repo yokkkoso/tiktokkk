@@ -51,7 +51,8 @@ public final class SettingsEntry {
         MAIN.postDelayed(() -> {
             try {
                 if (list.findViewWithTag(TAG) != null) return;
-                list.addView(row(list.getContext()));   // append -> under the last item (Settings & privacy)
+                // Match a native row's text colour so the label stays readable in light and dark themes.
+                list.addView(row(list.getContext(), rowTextColor(list)));
             } catch (Throwable ignored) {}
         }, 400);
     }
@@ -66,11 +67,31 @@ public final class SettingsEntry {
         return null;
     }
 
-    private static TextView row(Context c) {
+    // The text colour of an existing menu-row label (theme-adaptive); falls back to primary text.
+    private static int rowTextColor(View v) {
+        if (v instanceof TextView) {
+            CharSequence t = ((TextView) v).getText();
+            if (t != null && t.length() > 0) return ((TextView) v).getCurrentTextColor();
+        }
+        if (v instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) {
+                Integer c = boxed(rowTextColor(g.getChildAt(i)));
+                if (c != null) return c;
+            }
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    private static Integer boxed(int c) {
+        return c == Integer.MIN_VALUE ? null : c;
+    }
+
+    private static TextView row(Context c, int color) {
         TextView row = new TextView(c);
         row.setTag(TAG);
         row.setText("⚙️  tiktokkk - Mod settings");
-        row.setTextColor(0xFFFFFFFF);
+        row.setTextColor(color == Integer.MIN_VALUE ? resolvePrimaryText(c) : color);
         row.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         int h = dp(c, 14), s = dp(c, 24);
         row.setPadding(s, h, s, h);
@@ -82,6 +103,20 @@ public final class SettingsEntry {
             if (a != null) Menu.show(a);
         });
         return row;
+    }
+
+    private static int resolvePrimaryText(Context c) {
+        try {
+            android.util.TypedValue tv = new android.util.TypedValue();
+            if (c.getTheme().resolveAttribute(android.R.attr.textColorPrimary, tv, true)) {
+                int color = tv.data;
+                if (tv.type == android.util.TypedValue.TYPE_STRING || color == 0) {
+                    color = c.getResources().getColor(tv.resourceId, c.getTheme());
+                }
+                return color;
+            }
+        } catch (Throwable ignored) {}
+        return 0xFF161823;   // TikTok's near-black primary text (readable on the usual light drawer)
     }
 
     private static int dp(Context c, int v) {
