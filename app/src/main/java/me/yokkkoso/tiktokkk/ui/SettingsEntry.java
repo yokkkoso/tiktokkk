@@ -16,10 +16,7 @@ import android.widget.TextView;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
-// Inject a "tiktokkk" row into TikTok's profile side-drawer (list id s2b) that opens the settings
-// dialog - a native-looking alternative to the floating gear button.
 public final class SettingsEntry {
-
     private static final String TAG = "kkk_settings_entry";
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
@@ -44,20 +41,17 @@ public final class SettingsEntry {
     }
 
     private static void inject(View added) {
-        // Fire both when the drawer list (s2b) itself is added and when any row is added under it,
-        // so a missed list-add or a re-population (removeAllViews + re-add) still gets our row.
         final ViewGroup list = drawerList(added);
         if (list == null) return;
         MAIN.postDelayed(() -> {
             try {
                 if (list.findViewWithTag(TAG) != null) return;
-                // Match a native row's text colour so the label stays readable in light and dark themes.
+
                 list.addView(row(list.getContext(), rowTextColor(list)));
             } catch (Throwable ignored) {}
         }, 400);
     }
 
-    // The s2b list, found from the added view itself or a nearby ancestor.
     private static ViewGroup drawerList(View v) {
         for (int i = 0; i < 4 && v != null; i++) {
             if (v instanceof ViewGroup && Ids.DRAWER_LIST.equals(Ids.nameOf(v))) return (ViewGroup) v;
@@ -67,7 +61,6 @@ public final class SettingsEntry {
         return null;
     }
 
-    // The text colour of an existing menu-row label (theme-adaptive); falls back to primary text.
     private static int rowTextColor(View v) {
         if (v instanceof TextView) {
             CharSequence t = ((TextView) v).getText();
@@ -116,7 +109,7 @@ public final class SettingsEntry {
                 return color;
             }
         } catch (Throwable ignored) {}
-        return 0xFF161823;   // TikTok's near-black primary text (readable on the usual light drawer)
+        return 0xFF161823;
     }
 
     private static int dp(Context c, int v) {

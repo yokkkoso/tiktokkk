@@ -21,7 +21,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class FeedDecorator {
-
     private static final SimpleDateFormat FMT = new SimpleDateFormat("dd.MM.yyyy", Locale.US);
     private static final int DIM = 0x99FFFFFF;
     private static final long WEEK_MS = 7L * 24 * 3600 * 1000;
@@ -41,8 +40,7 @@ public final class FeedDecorator {
                     hideSearchAiButton(tv);
                     String id = Ids.nameOf(tv);
                     if (id == null) return;
-                    // Defer: the native tv_post_time date is populated shortly AFTER the title, so
-                    // stamping immediately can't see it and would produce a double date. Let it land.
+
                     if (Ids.TITLE.equals(id)) {
                         final TextView t = tv;
                         t.postDelayed(() -> stampTitle(t), 350);
@@ -53,8 +51,6 @@ public final class FeedDecorator {
             TikToKKK.log("feed decorator install failed: " + t);
         }
         try {
-            // TikTok re-shows the fast-search bar after we hide it, so a one-shot GONE loses. Force
-            // the bar's root (ht2) to stay hidden by intercepting every attempt to make it visible.
             XposedHelpers.findAndHookMethod(View.class, "setVisibility", int.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) {
@@ -69,8 +65,6 @@ public final class FeedDecorator {
     }
 
     private static void stampTitle(TextView tv) {
-        // Flag shows everywhere; the custom DATE only where TikTok has no native date (FYP) — else
-        // it would double the date on Following/detail posts (which carry a native tv_post_time).
         boolean wantDate = Prefs.is(Prefs.SHOW_FYP_TIMESTAMP) && !nativeDateNearby(tv);
         boolean wantFlag = Prefs.is(Prefs.SHOW_POST_REGION);
         if (!wantDate && !wantFlag) return;
@@ -78,7 +72,7 @@ public final class FeedDecorator {
             CharSequence t = tv.getText();
             if (t == null) return;
             String s = t.toString();
-            if (s.isEmpty() || s.length() > 80 || s.contains("  ·  ")) return;   // last: already stamped
+            if (s.isEmpty() || s.length() > 80 || s.contains("  ·  ")) return;
 
             String region = wantFlag ? AuthorDates.regionForHandle(s) : null;
             String flag = region != null && region.length() == 2 ? Countries.flag(region) : null;
@@ -117,8 +111,7 @@ public final class FeedDecorator {
 
     private static boolean findPostTime(View v, int depth) {
         if (v == null || depth > 5) return false;
-        // Only a VISIBLE, non-empty native date counts — the FYP layout keeps a hidden/empty
-        // tv_post_time in the tree, which must not suppress our stamp.
+
         if (Ids.POST_TIME.equals(Ids.nameOf(v)) && v.getVisibility() == View.VISIBLE
                 && v instanceof TextView) {
             CharSequence t = ((TextView) v).getText();
@@ -150,7 +143,6 @@ public final class FeedDecorator {
         return d + (Loc.isRu() ? "д назад" : "d ago");
     }
 
-    // 46.0.3: the "Find similar" tag = label id fb + icon fa inside container bq/br.
     private static void hideFindSimilar(TextView tv) {
         if (!Prefs.is(Prefs.HIDE_FIND_SIMILAR)) return;
         try {
@@ -167,8 +159,6 @@ public final class FeedDecorator {
         } catch (Throwable ignored) {}
     }
 
-    // Match the search-suggestion TextView by id (ubg) and hide the bar's root container (ht2) —
-    // resource-ids are language-independent, unlike the "Поиск ·"/"Search ·" text.
     private static void hideSearchBar(final TextView tv) {
         if (!Prefs.is(Prefs.HIDE_SEARCH_BAR)) return;
         try {
@@ -189,7 +179,6 @@ public final class FeedDecorator {
         } catch (Throwable ignored) {}
     }
 
-    // 46.0.3: the search "Ask"/Tako AI entrance = label id tv_tab_tako_entrance inside container iaf.
     private static void hideSearchAiButton(TextView tv) {
         if (!Prefs.is(Prefs.HIDE_AI_ASSISTANT)) return;
         try {

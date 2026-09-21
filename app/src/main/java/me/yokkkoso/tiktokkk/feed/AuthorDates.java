@@ -11,11 +11,9 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class AuthorDates {
-
     private static final String AWEME = "com.ss.android.ugc.aweme.feed.model.Aweme";
     private static final int CAP = 5000;
-    // LRU, not a HashMap that clears wholesale at a threshold — a mass clear made previously-stamped
-    // posts lose their flag/date on rebind (only a TikTok restart brought them back).
+
     private static final Map<String, Long> DATES = lru();
     private static final Map<String, String> REGIONS = lru();
     private static int STORES = 0;

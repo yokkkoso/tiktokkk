@@ -15,7 +15,6 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public final class AnonymousView {
-
     private static final String[] BLOCK = {
             "/friend/visit", "/visit_report", "/visit_event/report",
             "profile_view", "/visitor"

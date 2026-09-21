@@ -34,6 +34,12 @@ public final class Prefs {
     public static final String COPY_BIO = "copy_bio";
 
     public static final String HIDE_FEED_ADS = "hide_feed_ads";
+    public static final String HIDE_SPLASH_ADS = "hide_splash_ads";
+    public static final String COPY_COMMENT_NO_AUTHOR = "copy_comment_no_author";
+    public static final String HIDE_KEYWORDS = "hide_keywords";
+    public static final String REPOST_NO_LIMIT = "repost_no_limit";
+    public static final String AB_OVERRIDES = "ab_overrides";
+    public static final String AB_LOG = "ab_log";
     public static final String HIDE_LIVE = "hide_live";
     public static final String HIDE_SLIDESHOW = "hide_slideshow";
     public static final String HIDE_SHOP = "hide_shop";
@@ -59,7 +65,7 @@ public final class Prefs {
     public static final String LOCALE = "mod_locale";
     public static final String ACCENT_COLOR = "accent_color";
     public static final int DEFAULT_ACCENT = 0xFFFC0FC0;
-    public static final String FAB_OPACITY = "fab_opacity";   // download button opacity, 0-100 %
+    public static final String FAB_OPACITY = "fab_opacity";
 
     private static final Map<String, Boolean> BOOL_DEFAULTS = new LinkedHashMap<>();
     static {
@@ -85,6 +91,10 @@ public final class Prefs {
         BOOL_DEFAULTS.put(PROFILE_PIC_SAVE, true);
         BOOL_DEFAULTS.put(COPY_BIO, true);
         BOOL_DEFAULTS.put(HIDE_FEED_ADS, true);
+        BOOL_DEFAULTS.put(HIDE_SPLASH_ADS, true);
+        BOOL_DEFAULTS.put(COPY_COMMENT_NO_AUTHOR, false);
+        BOOL_DEFAULTS.put(AB_LOG, false);
+        BOOL_DEFAULTS.put(REPOST_NO_LIMIT, false);
         BOOL_DEFAULTS.put(HIDE_LIVE, false);
         BOOL_DEFAULTS.put(HIDE_SLIDESHOW, false);
         BOOL_DEFAULTS.put(HIDE_SHOP, true);
@@ -119,7 +129,6 @@ public final class Prefs {
         return sp;
     }
 
-    // One-time carry-over from the old "tiktokkkk" (4-k) store to the renamed one.
     private static void migrateLegacy(Context c) {
         try {
             if (!sp.getAll().isEmpty()) return;

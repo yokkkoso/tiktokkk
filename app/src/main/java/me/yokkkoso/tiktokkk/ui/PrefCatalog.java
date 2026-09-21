@@ -6,19 +6,23 @@ import java.util.Map;
 import me.yokkkoso.tiktokkk.Prefs;
 
 public final class PrefCatalog {
-
     public static final String REGION_CAT = "Region";
     public static final String MISC_CAT = "Misc";
+    public static final String STATUS_CAT = "Hook status";
     public static final String[][] CATEGORIES = {
             {"Confirmations", "🔒", "Like / follow / comment prompts"},
             {"Feed", "📺", "Ads, live, stories, progress bar"},
+            {"Comments", "💬", "Copying comment text"},
             {"Profile", "👤", "Post stats, anonymous view"},
             {"Downloads", "⬇️", "Watermark, quality"},
             {"Tab Bar", "📌", "Plus button, labels, badges"},
             {REGION_CAT, "🌍", "Spoof country / SIM"},
             {MISC_CAT, "🎨", "Accent, import / export / reset"},
-            {"Advanced", "⚙️", "Debug options"},
+            {"Advanced", "⚙️", "Hook status, debug options"},
     };
+
+    public static final java.util.Set<String> TEXT_PREFS = new java.util.HashSet<>(
+            java.util.Arrays.asList(Prefs.HIDE_KEYWORDS, Prefs.AB_OVERRIDES));
 
     public static final Map<String, String[][]> GROUPS = new LinkedHashMap<>();
     public static final Map<String, String> LABELS = new LinkedHashMap<>();
@@ -32,11 +36,14 @@ public final class PrefCatalog {
         GROUPS.put("Feed", new String[][]{
                 {"Content & Display", Prefs.SHOW_FYP_TIMESTAMP, Prefs.SHOW_POST_REGION,
                         Prefs.FORCE_PROGRESS_BAR, Prefs.HIDE_AI_ASSISTANT, Prefs.HIDE_FIND_SIMILAR,
-                        Prefs.HIDE_SEARCH_BAR, Prefs.DISABLE_SCROLL_REFRESH, Prefs.DISABLE_HOME_REFRESH},
-                {"Filtering", Prefs.HIDE_FEED_ADS, Prefs.HIDE_REWARDS_ADS, Prefs.HIDE_LIVE,
+                        Prefs.HIDE_SEARCH_BAR, Prefs.DISABLE_SCROLL_REFRESH, Prefs.DISABLE_HOME_REFRESH,
+                        Prefs.REPOST_NO_LIMIT},
+                {"Filtering", Prefs.HIDE_FEED_ADS, Prefs.HIDE_SPLASH_ADS, Prefs.HIDE_REWARDS_ADS, Prefs.HIDE_LIVE,
                         Prefs.HIDE_SHOP, Prefs.HIDE_COMMISSION, Prefs.HIDE_LOCATION_ADS,
                         Prefs.HIDE_AI_POSTS, Prefs.HIDE_SLIDESHOW, Prefs.HIDE_STORY,
-                        Prefs.HIDE_FRIEND_SUGGEST}});
+                        Prefs.HIDE_FRIEND_SUGGEST, Prefs.HIDE_KEYWORDS}});
+        GROUPS.put("Comments", new String[][]{
+                {"", Prefs.COPY_COMMENT_NO_AUTHOR}});
         GROUPS.put("Profile", new String[][]{
                 {"", Prefs.PROFILE_PIC_SAVE, Prefs.COPY_BIO, Prefs.ANONYMOUS_PROFILE_VIEW}});
         GROUPS.put("Downloads", new String[][]{
@@ -46,7 +53,7 @@ public final class PrefCatalog {
                 {"", Prefs.HIDE_PLUS_BUTTON, Prefs.HIDE_TAB_LABELS,
                         Prefs.HIDE_FRIENDS_BADGE, Prefs.HIDE_INBOX_BADGE}});
         GROUPS.put("Advanced", new String[][]{
-                {"", Prefs.DEBUG_CLICKS}});
+                {"", Prefs.DEBUG_CLICKS, Prefs.AB_LOG, Prefs.AB_OVERRIDES}});
 
         LABELS.put(Prefs.CONFIRM_LIKE, "Confirm before like");
         LABELS.put(Prefs.CONFIRM_FOLLOW, "Confirm before follow");
@@ -59,6 +66,12 @@ public final class PrefCatalog {
         LABELS.put(Prefs.CONFIRM_FAVORITE, "Confirm before favorite");
         LABELS.put(Prefs.CONFIRM_UNFAVORITE, "Confirm before unfavorite");
         LABELS.put(Prefs.HIDE_FEED_ADS, "Hide ads");
+        LABELS.put(Prefs.HIDE_SPLASH_ADS, "Hide startup ads");
+        LABELS.put(Prefs.COPY_COMMENT_NO_AUTHOR, "Copy comment without username");
+        LABELS.put(Prefs.HIDE_KEYWORDS, "Hide posts by keyword");
+        LABELS.put(Prefs.REPOST_NO_LIMIT, "Remove repost note limit");
+        LABELS.put(Prefs.AB_LOG, "Log AB flags");
+        LABELS.put(Prefs.AB_OVERRIDES, "AB flag overrides");
         LABELS.put(Prefs.HIDE_LIVE, "Disable live streaming (in feed)");
         LABELS.put(Prefs.HIDE_SLIDESHOW, "Hide photo slideshows");
         LABELS.put(Prefs.HIDE_SHOP, "Hide Shop posts");
@@ -101,6 +114,12 @@ public final class PrefCatalog {
         DESCS.put(Prefs.CONFIRM_FAVORITE, "Ask before adding a video to favorites");
         DESCS.put(Prefs.CONFIRM_UNFAVORITE, "Ask before removing a video from favorites");
         DESCS.put(Prefs.HIDE_FEED_ADS, "Remove sponsored posts from the feed");
+        DESCS.put(Prefs.HIDE_SPLASH_ADS, "Skip the full-screen ad shown when the app opens");
+        DESCS.put(Prefs.COPY_COMMENT_NO_AUTHOR, "Leave the author name out when copying a comment");
+        DESCS.put(Prefs.REPOST_NO_LIMIT, "Lift the 30-character cap when adding a note to a repost");
+        DESCS.put(Prefs.HIDE_KEYWORDS, "One word or phrase per line; posts whose caption contains one are skipped");
+        DESCS.put(Prefs.AB_LOG, "Write every experiment flag TikTok reads to the log");
+        DESCS.put(Prefs.AB_OVERRIDES, "One flag per line: key=true, key=false or key=number");
         DESCS.put(Prefs.HIDE_LIVE, "Skip live streams in the feed");
         DESCS.put(Prefs.HIDE_SLIDESHOW, "Skip photo slideshow posts");
         DESCS.put(Prefs.HIDE_SHOP, "Skip TikTok Shop product posts");

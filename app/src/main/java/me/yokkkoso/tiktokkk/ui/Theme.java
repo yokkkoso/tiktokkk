@@ -8,7 +8,6 @@ import android.widget.Switch;
 import me.yokkkoso.tiktokkk.Prefs;
 
 public final class Theme {
-
     public static int ACCENT = Prefs.DEFAULT_ACCENT;
     public static final int[] ACCENTS = {
             0xFFFC0FC0, 0xFF25F4EE, 0xFF7B2FF7, 0xFF25D366,
@@ -21,7 +20,7 @@ public final class Theme {
     public static final int TEXT = 0xFFFFFFFF;
     public static final int MUTED = 0xFF9A9AA2;
     public static final int TRACK_OFF = 0xFF3A3A40;
-    public static final int FAB_BG = 0x40000000;   // black, 25% opacity
+    public static final int FAB_BG = 0x40000000;
 
     public static void tint(Switch sw) {
         int on = sw.isChecked() ? ACCENT : TRACK_OFF;

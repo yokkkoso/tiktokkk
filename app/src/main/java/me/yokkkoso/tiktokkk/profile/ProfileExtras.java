@@ -39,7 +39,6 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class ProfileExtras {
-
     private static final android.os.Handler MAIN =
             new android.os.Handler(android.os.Looper.getMainLooper());
     private static final java.util.Set<Integer> WIRED = new java.util.HashSet<>();
@@ -63,13 +62,11 @@ public final class ProfileExtras {
             n++;
         } catch (Throwable ignored) {}
         try {
-            // RecyclerView / custom layouts add children via addViewInLayout, bypassing addView
             XposedHelpers.findAndHookMethod(ViewGroup.class, "addViewInLayout",
                     View.class, int.class, ViewGroup.LayoutParams.class, boolean.class, cb);
             n++;
         } catch (Throwable ignored) {}
         try {
-            // the "Подписчики/followers" label text is set AFTER addView, so detect it on setText
             XposedHelpers.findAndHookMethod(TextView.class, "setText",
                     CharSequence.class, TextView.BufferType.class, new XC_MethodHook() {
                 @Override
@@ -102,7 +99,6 @@ public final class ProfileExtras {
     private static void attach(View v) {
         if (v == null) return;
         if (Prefs.is(Prefs.PROFILE_PIC_SAVE)) {
-            // feed avatar (desc "профиль X"); skip the comment sheet (owned by StickerDownload).
             if (isAvatar(v) && !inComment(v)) {
                 wireSave(v, 800);
             } else if (v instanceof ImageView) {
@@ -142,7 +138,6 @@ public final class ProfileExtras {
         return false;
     }
 
-    // 46.0.3: the fullscreen viewer's close (X) button is id e2o (language-independent).
     private static boolean hasCloseButton(View v, int depth) {
         if (v == null || depth < 0) return false;
         if (Ids.VIEWER_CLOSE.equals(Ids.nameOf(v))) return true;
@@ -175,7 +170,6 @@ public final class ProfileExtras {
         return false;
     }
 
-    // 46.0.3: the profile follower/following count labels are id s5x (language-independent).
     private static boolean isFollowersLabel(View v) {
         return v instanceof TextView && Ids.PROFILE_COUNT.equals(Ids.nameOf(v));
     }
@@ -196,10 +190,9 @@ public final class ProfileExtras {
         if (v == null || depth > 14) return;
         if (v instanceof TextView) {
             final TextView t = (TextView) v;
-            // attach unconditionally (bio text loads async — reading it now would skip it);
-            // the text is read at click time instead
+
             MAIN.postDelayed(() -> {
-                t.setTextIsSelectable(false);   // stop native text-selection / translate
+                t.setTextIsSelectable(false);
                 t.setLongClickable(true);
                 t.setOnLongClickListener(view -> {
                     CharSequence txt = ((TextView) view).getText();
@@ -222,7 +215,7 @@ public final class ProfileExtras {
 
     private static void savePic(View anchor) {
         Context c = anchor.getContext();
-        // prefer the full-res square original from the avatar URL (the view bitmap is round-cropped)
+
         String url = Reflect.firstUrl(avatarUrlModel);
         if (url != null) {
             downloadImage(c, url);

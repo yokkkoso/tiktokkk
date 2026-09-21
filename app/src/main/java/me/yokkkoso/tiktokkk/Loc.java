@@ -5,7 +5,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class Loc {
-
     private static final Map<String, String> M = new HashMap<>();
 
     static {
@@ -52,11 +51,24 @@ public final class Loc {
         M.put("Watermark, quality", "Вотермарк, качество");
         M.put("Plus button, AI, links", "Плюс, ИИ, ссылки");
         M.put("Spoof country / SIM", "Подмена страны / SIM");
-        M.put("Debug options", "Отладка");
+        M.put("Hook status, debug options", "Статус хуков, отладка");
 
         M.put("Content & Display", "Контент и отображение");
         M.put("Filtering", "Фильтрация");
         M.put("Hide ads", "Скрыть рекламу");
+        M.put("Hide startup ads", "Скрыть рекламу при запуске");
+        M.put("Comments", "Комментарии");
+        M.put("Copying comment text", "Копирование текста комментария");
+        M.put("Copy comment without username", "Копировать комментарий без имени");
+        M.put("Hide posts by keyword", "Скрывать посты по словам");
+        M.put("Remove repost note limit", "Снять лимит заметки репоста");
+        M.put("Lift the 30-character cap when adding a note to a repost", "Убирает ограничение в 30 символов для заметки при репосте");
+        M.put("Log AB flags", "Логировать AB-флаги");
+        M.put("Advanced", "Дополнительно");
+        M.put("Hook status, debug options", "Статус хуков, отладка");
+        M.put("Dump screen", "Дамп экрана");
+        M.put("View logs", "Показать логи");
+        M.put("AB flag overrides", "Переопределение AB-флагов");
         M.put("Disable live streaming (in feed)", "Отключить эфиры (в ленте)");
         M.put("Hide Shop posts", "Скрыть посты магазина");
         M.put("Disable Visual Search tag", "Отключить тег визуального поиска");
@@ -77,6 +89,11 @@ public final class Loc {
         M.put("Ask before following an account", "Спрашивать перед подпиской");
         M.put("Ask before liking a comment", "Спрашивать перед лайком коммента");
         M.put("Remove sponsored posts from the feed", "Убирать рекламные посты из ленты");
+        M.put("Skip the full-screen ad shown when the app opens", "Пропускать полноэкранную рекламу при открытии приложения");
+        M.put("Leave the author name out when copying a comment", "Не включать имя автора при копировании комментария");
+        M.put("One word or phrase per line; posts whose caption contains one are skipped", "По одному слову или фразе в строке; посты с ними в описании пропускаются");
+        M.put("Write every experiment flag TikTok reads to the log", "Записывать в лог все AB-флаги, которые читает TikTok");
+        M.put("One flag per line: key=true, key=false or key=number", "По одному флагу в строке: ключ=true, ключ=false или ключ=число");
         M.put("Skip live streams in the feed", "Пропускать эфиры в ленте");
         M.put("Skip photo slideshow posts", "Пропускать фото-слайдшоу");
         M.put("Skip TikTok Shop product posts", "Пропускать посты магазина");

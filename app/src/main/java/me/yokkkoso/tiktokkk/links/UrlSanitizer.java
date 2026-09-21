@@ -14,7 +14,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class UrlSanitizer {
-
     private static final Pattern URL = Pattern.compile("https?://\\S+");
 
     public static void install(ClassLoader cl) {

@@ -22,13 +22,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import me.yokkkoso.tiktokkk.Countries;
+import me.yokkkoso.tiktokkk.FeatureStatus;
 import me.yokkkoso.tiktokkk.Loc;
 import me.yokkkoso.tiktokkk.Prefs;
 
 public final class Menu {
-
-    public static final boolean DEV = false;
-    static final String VERSION = "1.2.1";
+    static final String VERSION = "1.3.0";
 
     private static Dialog CURRENT;
     private static FrameLayout HOST;
@@ -102,7 +101,6 @@ public final class Menu {
         LinearLayout group = Widgets.groupCard(a);
         boolean first = true;
         for (String[] c : PrefCatalog.CATEGORIES) {
-            if (!DEV && "Advanced".equals(c[0])) continue;
             if (!first) group.addView(Widgets.divider(a));
             first = false;
             final String cat = c[0];
@@ -126,6 +124,30 @@ public final class Menu {
             col.addView(Widgets.restartNote(a));
         } else if (PrefCatalog.MISC_CAT.equals(cat)) {
             col.addView(miscGroup(a));
+        } else if ("Advanced".equals(cat)) {
+            String[][] groups = PrefCatalog.GROUPS.get(cat);
+            if (groups != null) {
+                for (String[] sub : groups) {
+                    LinearLayout g = Widgets.groupCard(a);
+                    for (int i = 1; i < sub.length; i++) {
+                        if (i > 1) g.addView(Widgets.divider(a));
+                        g.addView(row(a, sub[i]));
+                    }
+                    col.addView(g);
+                }
+            }
+            col.addView(Widgets.subHeader(a, Loc.t(PrefCatalog.STATUS_CAT)));
+            col.addView(statusGroup(a));
+            LinearLayout logs = new LinearLayout(a);
+            logs.setOrientation(LinearLayout.HORIZONTAL);
+            logs.setPadding(0, Theme.dp(a, 12), 0, 0);
+            logs.addView(Widgets.button(a, Loc.t("Dump screen"), false, v -> {
+                if (CURRENT != null) CURRENT.dismiss();
+                DebugTools.dumpViews(a);
+            }));
+            logs.addView(Widgets.gap(a));
+            logs.addView(Widgets.button(a, Loc.t("View logs"), false, v -> DebugTools.showLogs(a)));
+            col.addView(logs);
         } else {
             String[][] groups = PrefCatalog.GROUPS.get(cat);
             if (groups != null) {
@@ -170,6 +192,47 @@ public final class Menu {
         g.addView(Widgets.divider(a));
         g.addView(Widgets.actionRow(a, "Reset settings", () -> resetSettings(a)));
         return g;
+    }
+
+    private static LinearLayout statusGroup(Activity a) {
+        LinearLayout g = Widgets.groupCard(a);
+        java.util.Map<String, FeatureStatus.State> all = FeatureStatus.snapshot();
+        if (all.isEmpty()) {
+            g.addView(statusRow(a, Loc.t("No hooks reported yet"), "", Theme.MUTED));
+            return g;
+        }
+        boolean first = true;
+        for (java.util.Map.Entry<String, FeatureStatus.State> e : all.entrySet()) {
+            if (!first) g.addView(Widgets.divider(a));
+            first = false;
+            FeatureStatus.State s = e.getValue();
+            String mark = s == FeatureStatus.State.OK ? "✓  "
+                    : s == FeatureStatus.State.FAILED ? "✕  " : "–  ";
+            int color = s == FeatureStatus.State.OK ? 0xFF3DDC84
+                    : s == FeatureStatus.State.FAILED ? 0xFFFF453A : Theme.MUTED;
+            g.addView(statusRow(a, mark + Loc.t(e.getKey()), FeatureStatus.detail(e.getKey()), color));
+        }
+        return g;
+    }
+
+    private static View statusRow(Activity a, String title, String detail, int color) {
+        LinearLayout row = new LinearLayout(a);
+        row.setOrientation(LinearLayout.VERTICAL);
+        int pad = Theme.dp(a, 14);
+        row.setPadding(pad, Theme.dp(a, 11), pad, Theme.dp(a, 11));
+        TextView t = new TextView(a);
+        t.setText(title);
+        t.setTextColor(color);
+        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        row.addView(t);
+        if (detail != null && !detail.isEmpty()) {
+            TextView d = new TextView(a);
+            d.setText(detail);
+            d.setTextColor(Theme.MUTED);
+            d.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+            row.addView(d);
+        }
+        return row;
     }
 
     public static void pickAccent(Activity a) {
@@ -268,17 +331,6 @@ public final class Menu {
         wrap.setOrientation(LinearLayout.VERTICAL);
         wrap.setPadding(0, Theme.dp(a, 16), 0, 0);
 
-        if (DEV) {
-            LinearLayout logs = new LinearLayout(a);
-            logs.setOrientation(LinearLayout.HORIZONTAL);
-            logs.addView(Widgets.button(a, "Dump screen", false, v -> {
-                if (CURRENT != null) CURRENT.dismiss();
-                DebugTools.dumpViews(a);
-            }));
-            logs.addView(Widgets.gap(a));
-            logs.addView(Widgets.button(a, "View logs", false, v -> DebugTools.showLogs(a)));
-            wrap.addView(logs);
-        }
 
         LinearLayout act = new LinearLayout(a);
         act.setOrientation(LinearLayout.HORIZONTAL);
@@ -291,6 +343,7 @@ public final class Menu {
     }
 
     private static View row(Activity a, String key) {
+        if (PrefCatalog.TEXT_PREFS.contains(key)) return textRow(a, key);
         LinearLayout row = new LinearLayout(a);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
@@ -325,6 +378,60 @@ public final class Menu {
         });
         row.addView(sw);
         return row;
+    }
+
+    private static View textRow(Activity a, String key) {
+        LinearLayout row = new LinearLayout(a);
+        row.setOrientation(LinearLayout.VERTICAL);
+        int pad = Theme.dp(a, 14);
+        row.setPadding(pad, Theme.dp(a, 11), pad, Theme.dp(a, 11));
+
+        TextView title = new TextView(a);
+        title.setText(Loc.t(PrefCatalog.LABELS.get(key)));
+        title.setTextColor(Theme.TEXT);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        row.addView(title);
+
+        TextView value = new TextView(a);
+        value.setTextColor(Theme.MUTED);
+        value.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        value.setPadding(0, Theme.dp(a, 2), 0, 0);
+        value.setText(textSummary(key));
+        row.addView(value);
+
+        row.setOnClickListener(v -> editText(a, key, value));
+        return row;
+    }
+
+    private static String textSummary(String key) {
+        String cur = Prefs.getString(key, "").trim();
+        if (cur.isEmpty()) return Loc.t(PrefCatalog.DESCS.get(key));
+        String flat = cur.replace('\n', ' ');
+        return flat.length() > 60 ? flat.substring(0, 60) + "..." : flat;
+    }
+
+    private static void editText(Activity a, String key, TextView summary) {
+        final EditText et = new EditText(a);
+        et.setText(Prefs.getString(key, ""));
+        et.setTextColor(Theme.TEXT);
+        et.setHintTextColor(Theme.MUTED);
+        et.setHint(Loc.t(PrefCatalog.DESCS.get(key)));
+        et.setMinLines(3);
+        et.setGravity(Gravity.TOP);
+        int p = Theme.dp(a, 12);
+        et.setPadding(p, p, p, p);
+        dlg(a)
+                .setTitle(Loc.t(PrefCatalog.LABELS.get(key)))
+                .setView(et)
+                .setPositiveButton(android.R.string.ok, (d, w) -> {
+                    Prefs.setString(key, et.getText().toString().trim());
+                    if (Prefs.AB_OVERRIDES.equals(key)) {
+                        me.yokkkoso.tiktokkk.FeatureFlags.reload();
+                    }
+                    summary.setText(textSummary(key));
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private static View regionRow(Activity a) {

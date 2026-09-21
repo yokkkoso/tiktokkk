@@ -8,7 +8,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class WatermarkRemover {
-
     public static void install(ClassLoader cl) {
         try {
             Class<?> video = XposedHelpers.findClass("com.ss.android.ugc.aweme.feed.model.Video", cl);

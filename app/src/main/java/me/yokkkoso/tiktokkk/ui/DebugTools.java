@@ -16,7 +16,6 @@ import me.yokkkoso.tiktokkk.Logs;
 import me.yokkkoso.tiktokkk.TikToKKK;
 
 public final class DebugTools {
-
     public static void dumpViews(Activity a) {
         Logs.clear();
         TikToKKK.log("=== SCREEN DUMP: " + a.getClass().getSimpleName() + " ===");

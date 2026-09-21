@@ -5,7 +5,6 @@ import java.util.List;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class Reflect {
-
     public static Object call(Object o, String method) {
         try {
             return XposedHelpers.callMethod(o, method);

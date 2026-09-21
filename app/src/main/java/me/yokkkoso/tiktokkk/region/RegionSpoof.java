@@ -12,9 +12,8 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
 public final class RegionSpoof {
-
-    private static final int SIM_READY = 5;      // TelephonyManager.SIM_STATE_READY
-    private static final int NETWORK_LTE = 13;   // TelephonyManager.NETWORK_TYPE_LTE
+    private static final int SIM_READY = 5;
+    private static final int NETWORK_LTE = 13;
 
     public static void install(ClassLoader cl) {
         if (region().isEmpty()) return;
@@ -46,7 +45,6 @@ public final class RegionSpoof {
         }
     }
 
-    // type: 0=iso(lower), 1=mcc+mnc, 2=operator name. Short-circuits the real call.
     private static XC_MethodHook valueHook(final int type) {
         return new XC_MethodHook() {
             @Override

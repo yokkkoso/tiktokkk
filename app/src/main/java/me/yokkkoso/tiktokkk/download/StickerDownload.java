@@ -27,7 +27,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class StickerDownload {
-
     public static void install(ClassLoader cl) {
         XC_MethodHook cb = new XC_MethodHook() {
             @Override
@@ -82,7 +81,6 @@ public final class StickerDownload {
         return false;
     }
 
-    // 46.0.3: the enlarged-sticker viewer carries a report (fri) and close (fqe) button.
     private static boolean hasReport(View v, int depth) {
         if (v == null || depth < 0) return false;
         String id = Ids.nameOf(v);
@@ -129,8 +127,6 @@ public final class StickerDownload {
         }
     }
 
-    // Fresco SmartImageViews use a custom drawable with intrinsic size -1 and render to a hardware
-    // layer (so View.draw yields blank). Draw the drawable itself at the view's laid-out size.
     private static Bitmap toBitmap(Drawable d, int fallbackW, int fallbackH) {
         if (d == null) return null;
         if (d instanceof BitmapDrawable && ((BitmapDrawable) d).getBitmap() != null) {

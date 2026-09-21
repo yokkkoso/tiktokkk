@@ -1,19 +1,25 @@
 package me.yokkkoso.tiktokkk.feed;
 
+import me.yokkkoso.tiktokkk.FeatureStatus;
 import me.yokkkoso.tiktokkk.Prefs;
 import me.yokkkoso.tiktokkk.TikToKKK;
+import me.yokkkoso.tiktokkk.dex.DexTargets;
+
+import org.luckypray.dexkit.DexKitBridge;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
-// Short videos hide the seek bar via a duration gate: X.0zo1.LJIIL(boolean) returns a
-// "show type" (0=visible draggable, 4=alpha 0, 3=GONE) fed to 0zo3.setSeekBarShowType.
-// Remap the hidden types to 0 so the bar shows on every video.
 public final class SeekBar {
+    public static final String FEATURE = "Always show progress bar";
 
-    public static void install(ClassLoader cl) {
+    public static void install(ClassLoader cl, DexKitBridge bridge) {
+        Class<?> view = DexTargets.seekBar(bridge, cl);
+        if (view == null) {
+            FeatureStatus.failed(FEATURE, "seek bar class not found");
+            return;
+        }
         try {
-            Class<?> view = cl.loadClass("X.0zo3");
             XposedHelpers.findAndHookMethod(view, "setSeekBarShowType", int.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam p) {
@@ -22,8 +28,10 @@ public final class SeekBar {
                     if (t == 4 || t == 3) p.args[0] = 0;
                 }
             });
-            TikToKKK.log("seek bar hook installed");
+            FeatureStatus.ok(FEATURE, view.getName() + ".setSeekBarShowType");
+            TikToKKK.log("seek bar hook installed on " + view.getName());
         } catch (Throwable t) {
+            FeatureStatus.failed(FEATURE, "setSeekBarShowType missing on " + view.getName());
             TikToKKK.log("seek bar hook install failed: " + t);
         }
     }

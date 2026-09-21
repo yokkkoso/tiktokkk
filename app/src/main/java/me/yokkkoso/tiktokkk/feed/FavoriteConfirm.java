@@ -13,11 +13,7 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
-// Favoriting a video routes through AwemeCollectionAgent.collect(String,Map,Function2,Function2);
-// removing routes through unCollect(...). They are separate methods, so each confirmation gates
-// only its own direction.
 public final class FavoriteConfirm {
-
     private static final String AGENT =
             "com.ss.android.ugc.aweme.favorites.business.aweme.AwemeCollectionAgent";
 

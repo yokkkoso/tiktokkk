@@ -6,11 +6,7 @@ import me.yokkkoso.tiktokkk.TikToKKK;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
-// The Save gate combines three sources with NO getters on VideoControl, so all three are
-// neutralized: Aweme.isPreventDownload, author User.isPreventDownload, and VideoControl fields
-// preventDownloadType / allowDownload.
 public final class DownloadUnlock {
-
     public static void install(ClassLoader cl) {
         try {
             Class<?> aweme = XposedHelpers.findClass("com.ss.android.ugc.aweme.feed.model.Aweme", cl);

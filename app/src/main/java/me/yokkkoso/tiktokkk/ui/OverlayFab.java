@@ -17,9 +17,7 @@ import me.yokkkoso.tiktokkk.Prefs;
 import me.yokkkoso.tiktokkk.TikToKKK;
 import me.yokkkoso.tiktokkk.download.VideoDownloader;
 
-// The ⤓ download button. Settings now live in the profile-drawer entry (see SettingsEntry).
 public final class OverlayFab {
-
     private static final String DL_TAG = "kkk_dl";
     private static final android.graphics.Rect RC = new android.graphics.Rect();
 
@@ -84,7 +82,6 @@ public final class OverlayFab {
         } catch (Throwable ignored) {}
     }
 
-    // A real post player shows the interaction-rail LIKE button (obfuscated ids, language-independent).
     private static boolean onPost(View v, int depth) {
         if (v == null || depth > 32 || v.getVisibility() != View.VISIBLE) return false;
         if (v.getGlobalVisibleRect(RC) && Ids.LIKE_BTN.contains(Ids.nameOf(v))) return true;
@@ -97,7 +94,6 @@ public final class OverlayFab {
         return false;
     }
 
-    // Black with user-selected alpha (opacity %). Default 25% (the old FAB_BG).
     private static int fabColor() {
         int pct = Math.max(0, Math.min(100, Prefs.getInt(Prefs.FAB_OPACITY, 25)));
         return (pct * 255 / 100) << 24;

@@ -8,10 +8,11 @@ Xposed/LSPosed module for the Android TikTok app, with added tweaks and fixes.
   <img src="assets/settings-menu.png" alt="tiktokkk settings panel" width="300">
 </p>
 
-> ❗❗❗ **Only TikTok `46.0.3` is supported.** ❗❗❗
-> Detection relies on TikTok's hardcoded (obfuscated) resource-ids and model symbols, which change
-> on every TikTok update - on any other version features will silently misbehave or do nothing. The
-> module logs the detected host version on start and warns if it isn't `46.0.3`.
+> ❗❗❗ **Supported TikTok versions: `46.0.3`, `46.6.3`, `46.9.3`.** ❗❗❗
+> Detection relies on TikTok's obfuscated resource-ids and model symbols, and TikTok renumbers every
+> one of them on each feature release - so on an unlisted version features will silently misbehave
+> or do nothing. The module picks the matching id set from the host versionCode at startup, logs the
+> detected version, and warns when it is untested.
 
 This project bundles a set of quality-of-life tweaks for TikTok - ad and clutter filtering, action
 confirmations, unrestricted and high-quality downloads, region spoofing, profile helpers, and more -
@@ -22,11 +23,16 @@ When building from source, the module is compiled against the Android SDK and in
 as either a rooted **LSPosed** module or a rootless **LSPatch** patch - see [Install](#install).
 
 Added settings:
-- **Feed ad filtering**: Hide sponsored posts across the For You, Following, and search feeds.
+- **Feed ad filtering**: Hide sponsored posts across the For You, Following, and search feeds,
+  including the TopView ad that TikTok injects as the first post after a cold launch, and the
+  full-screen ad shown while the app opens.
+- **Keyword filtering**: Hide posts whose caption contains any of your own list of words.
 - **Clutter filtering**: Hide live streams, Shop posts, slideshows, stories, AI-generated posts, and
   rewarded/location/commission ads. Skip friend-recommendation cards.
 - **Hide UI elements**: Fast-search bar, visual-search tag, Tako AI button, create (+) tab, tab
   labels, and notification badges — each independently toggleable.
+- **Comments**: Copy a comment without the `@username:` prefix TikTok prepends.
+- **Reposting**: Lift the 30-character cap on the note added to a repost.
 - **Action confirmations**: Ask before like/unlike, follow, comment like/dislike, story like, quick
   share, or quick repost, so a mis-tap never fires.
 - **Original (HQ) download**: The ⤓ button's top option saves the true no-watermark source

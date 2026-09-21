@@ -1,7 +1,6 @@
 package me.yokkkoso.tiktokkk;
 
 public final class Countries {
-
     public static final String[][] LIST = {
             {"", "Off (use real region)", "", "", ""},
             {"US", "United States", "310", "260", "T-Mobile"},

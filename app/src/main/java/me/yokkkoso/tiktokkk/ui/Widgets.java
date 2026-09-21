@@ -19,7 +19,6 @@ import me.yokkkoso.tiktokkk.Loc;
 import me.yokkkoso.tiktokkk.Prefs;
 
 public final class Widgets {
-
     public static LinearLayout column(Activity a) {
         LinearLayout col = new LinearLayout(a);
         col.setOrientation(LinearLayout.VERTICAL);

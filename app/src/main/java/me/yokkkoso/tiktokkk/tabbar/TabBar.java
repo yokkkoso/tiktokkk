@@ -15,7 +15,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class TabBar {
-
     public static void install(ClassLoader cl) {
         try {
             XposedHelpers.findAndHookMethod(Activity.class, "onResume", new XC_MethodHook() {
@@ -50,7 +49,7 @@ public final class TabBar {
                 View tab = bar.getChildAt(i);
                 CharSequence dsc = tab.getContentDescription();
                 if (dsc == null || !(tab instanceof ViewGroup)) continue;
-                String tid = Ids.nameOf(tab);   // 46.0.3: Friends nw7, Inbox nw9 (language-independent)
+                String tid = Ids.nameOf(tab);
                 boolean friends = Ids.FRIENDS_TAB.contains(tid);
                 boolean inbox = Ids.INBOX_TAB.contains(tid);
                 processTab((ViewGroup) tab, dsc.toString(), labels,
@@ -59,7 +58,6 @@ public final class TabBar {
         } catch (Throwable ignored) {}
     }
 
-    // The tab bar = a ViewGroup with 4-6 children, most carrying a contentDescription (the tabs).
     private static ViewGroup findTabBar(ViewGroup root) {
         ArrayDeque<ViewGroup> q = new ArrayDeque<>();
         q.add(root);

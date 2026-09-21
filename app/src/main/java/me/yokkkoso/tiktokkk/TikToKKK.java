@@ -1,12 +1,9 @@
 package me.yokkkoso.tiktokkk;
 
 import me.yokkkoso.tiktokkk.feed.FeedFilter;
-import me.yokkkoso.tiktokkk.feed.SearchAdFilter;
-import me.yokkkoso.tiktokkk.feed.RefreshBlock;
 import me.yokkkoso.tiktokkk.feed.AuthorDates;
 import me.yokkkoso.tiktokkk.feed.FeedDecorator;
-import me.yokkkoso.tiktokkk.feed.SeekBar;
-import me.yokkkoso.tiktokkk.feed.CommentConfirm;
+import me.yokkkoso.tiktokkk.dex.DexBootstrap;
 import me.yokkkoso.tiktokkk.download.VideoDownloader;
 import me.yokkkoso.tiktokkk.download.StickerDownload;
 import me.yokkkoso.tiktokkk.download.DownloadUnlock;
@@ -30,11 +27,11 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class TikToKKK implements IXposedHookLoadPackage {
-
     private static final String TAG = "TikToKKK";
     private static final String TARGET = "com.zhiliaoapp.musically";
     private static final String TARGET_TRILL = "com.ss.android.ugc.trill";
-    static final String TESTED_VERSION = "46.0.3";
+    static final java.util.List<String> TESTED_VERSIONS =
+            java.util.Arrays.asList("46.0.3", "46.6.3", "46.9.3");
     private static boolean versionLogged;
 
     @Override
@@ -50,22 +47,49 @@ public class TikToKKK implements IXposedHookLoadPackage {
         safe("modMenu", OverlayFab::installTrigger);
         safe("settingsEntry", () -> me.yokkkoso.tiktokkk.ui.SettingsEntry.install(cl));
         safe("feedFilter", () -> FeedFilter.install(cl));
-        safe("searchAdFilter", () -> SearchAdFilter.install(cl));
-        safe("refreshBlock", () -> RefreshBlock.install(cl));
         safe("authorDates", () -> AuthorDates.install(cl));
         safe("feedDecorator", () -> FeedDecorator.install(cl));
         safe("anonymousView", () -> AnonymousView.install(cl));
         safe("urlSanitizer", () -> UrlSanitizer.install(cl));
+        safe("featureFlags", () -> FeatureFlags.install(cl));
+        safe("topViewBlock", () -> me.yokkkoso.tiktokkk.feed.SplashAdBlock.installTopView(cl));
+        safe("commentCopy", () -> me.yokkkoso.tiktokkk.feed.CommentCopy.install(cl));
+        safe("repostLimit", () -> me.yokkkoso.tiktokkk.feed.RepostLimit.install(cl));
         safe("regionSpoof", () -> RegionSpoof.install(cl));
         safe("tabBar", () -> TabBar.install(cl));
         safe("profileExtras", () -> ProfileExtras.install(cl));
-        safe("commentConfirm", () -> CommentConfirm.install(cl));
         safe("favoriteConfirm", () -> me.yokkkoso.tiktokkk.feed.FavoriteConfirm.install(cl));
         safe("downloadUnlock", () -> DownloadUnlock.install(cl));
         safe("watermarkRemover", () -> WatermarkRemover.install(cl));
         safe("videoDownloader", () -> VideoDownloader.install(cl));
         safe("stickerDownload", () -> StickerDownload.install(cl));
-        safe("seekBar", () -> SeekBar.install(cl));
+        safe("dexBootstrap", () -> hookAppAttach(cl));
+    }
+
+    private void hookAppAttach(ClassLoader cl) {
+        XposedHelpers.findAndHookMethod(android.app.Application.class, "attach", Context.class,
+                new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) {
+                bootstrap((Context) param.args[0], cl);
+            }
+        });
+        XposedHelpers.findAndHookMethod(android.app.Activity.class, "onCreate",
+                android.os.Bundle.class, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) {
+                bootstrap((Context) param.thisObject, cl);
+            }
+        });
+    }
+
+    private static void bootstrap(Context ctx, ClassLoader cl) {
+        try {
+            Ids.init(ctx);
+            DexBootstrap.run(ctx, cl);
+        } catch (Throwable t) {
+            log("dex bootstrap failed: " + t);
+        }
     }
 
     private static final ThreadLocal<Boolean> BYPASS = new ThreadLocal<>();
@@ -134,11 +158,6 @@ public class TikToKKK implements IXposedHookLoadPackage {
         return Ids.inSubtreeExact(v, ids, 4) || Ids.inAncestryExact(v, ids, 2);
     }
 
-    // Comment like/dislike -> CommentConfirm, favorite -> FavoriteConfirm (model-layer). Like/unlike
-    // and follow are blocked here at View.performClick, BEFORE TikTok's optimistic UI toggle - a
-    // model-method block runs too late (the heart/Follow state already flipped). Detection is id-based
-    // (LIKE_BTN, FOLLOW_BTN, STORY_MARKERS, QUICK_SHARE, QUICK_REPOST); only the like-vs-unlike
-    // direction still reads content-desc, since no id/model distinguishes it without side effects.
     private String promptFor(View v) {
         boolean storyCtx = Ids.inAncestryExact(v, Ids.STORY_MARKERS, 24)
                 || Ids.inSubtreeExact(v, Ids.STORY_MARKERS, 6);
@@ -271,7 +290,9 @@ public class TikToKKK implements IXposedHookLoadPackage {
     private void safe(String name, Runnable r) {
         try {
             r.run();
+            FeatureStatus.okIfUnset(name);
         } catch (Throwable t) {
+            FeatureStatus.failed(name, String.valueOf(t));
             log("hook '" + name + "' failed: " + t);
         }
     }
@@ -288,8 +309,8 @@ public class TikToKKK implements IXposedHookLoadPackage {
             android.content.pm.PackageInfo pi =
                     c.getPackageManager().getPackageInfo(c.getPackageName(), 0);
             log("host " + c.getPackageName() + " " + pi.versionName + " (vc " + pi.versionCode
-                    + "); tested on TikTok " + TESTED_VERSION);
-            if (!TESTED_VERSION.equals(pi.versionName)) {
+                    + "); tested on TikTok " + TESTED_VERSIONS);
+            if (!TESTED_VERSIONS.contains(pi.versionName)) {
                 log("WARNING: untested TikTok version — obfuscated-symbol features may not work");
             }
         } catch (Throwable ignored) {}

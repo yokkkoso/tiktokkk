@@ -1,46 +1,107 @@
 package me.yokkkoso.tiktokkk;
 
+import android.content.Context;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public final class Ids {
-    public static final List<String> COMMENT_LIKE = Arrays.asList(
-            "comment_digg", "comment_like", "comment_praise");
-    // 46.0.3 right-rail interaction buttons (obfuscated, per-version). Unique ids only —
-    // fud is shared between like/share so it is intentionally excluded.
-    public static final List<String> LIKE_BTN = Arrays.asList("ftu", "fu0", "fu1", "fu_", "fu2");
-    public static final List<String> FOLLOW_BTN = Arrays.asList("idu", "iek", "ieu");
-    // 46.0.3 bottom-nav tabs: Home nw8, Friends nw7, Create nw4, Inbox nw9, Profile nw_.
-    public static final List<String> CREATE_TAB = Arrays.asList("nw4");
-    public static final List<String> FRIENDS_TAB = Arrays.asList("nw7");
-    public static final List<String> INBOX_TAB = Arrays.asList("nw9");
-    public static final List<String> AI_ASSISTANT = Arrays.asList(
-            "tako", "vs_tako_entrance", "aigc_entrance", "view_stub_ep_aigc_entrance", "x_n", "xvh");
-
-    // 46.0.3 single-view ids (obfuscated, change per TikTok version) for language-independent detection.
-    public static final String TITLE = "title";                       // FYP author/title button
-    public static final String POST_TIME = "tv_post_time";            // native upload-date label
-    public static final String PROFILE_COUNT = "s5x";                 // profile follower/following count
-    public static final String SEARCH_BAR_SUGGEST = "ubg";            // inline search suggestion text
-    public static final String SEARCH_BAR_ROOT = "ht2";               // inline search bar container
-    public static final String FIND_SIMILAR_LABEL = "fb";             // "Find similar" tag label
-    public static final String SEARCH_AI_LABEL = "tv_tab_tako_entrance"; // search "Ask"/Tako entrance
-    public static final String SEARCH_AI_BOX = "iaf";                 // search AI button container
-    public static final String VIEWER_CLOSE = "e2o";                  // fullscreen viewer close (X)
-    public static final String STICKER_REPORT = "fri";               // sticker viewer report
-    public static final String STICKER_CLOSE = "fqe";                 // sticker viewer close
-    public static final List<String> FIND_SIMILAR_BOX = Arrays.asList("bq", "br");
-    public static final List<String> AVATAR_IMG = Arrays.asList("user_avatar", "vnh");
-    public static final List<String> COMMENT_SHEET = Arrays.asList("ecj", "ec6", "i4h");
-    public static final String DRAWER_LIST = "s2b";                  // profile side-drawer menu list
+    public static final String TITLE = "title";
+    public static final String POST_TIME = "tv_post_time";
+    public static final String SEARCH_AI_LABEL = "tv_tab_tako_entrance";
+    public static final String LIKE_ICON_ACTIVE = "video_like_icon_active";
+    public static final String LIKE_ICON_INACTIVE = "video_like_icon_inactive";
     public static final List<String> STORY_MARKERS = Arrays.asList(
-            "vp_story_collection", "vp_story_immersive_feed");        // story player container
-    public static final String LIKE_ICON_ACTIVE = "video_like_icon_active";     // liked state
-    public static final String LIKE_ICON_INACTIVE = "video_like_icon_inactive"; // not-liked state
-    public static final List<String> QUICK_SHARE = Arrays.asList("xz0");        // "Share with <friend>" pill label
-    public static final List<String> QUICK_REPOST = Arrays.asList("tv_upvote"); // "Repost to followers" label
+            "vp_story_collection", "vp_story_immersive_feed");
+    public static final List<String> QUICK_REPOST = Arrays.asList("tv_upvote");
+    public static final String FIND_SIMILAR_LABEL = "fb";
+    public static final List<String> FIND_SIMILAR_BOX = Arrays.asList("bq", "br");
+
+    public static List<String> LIKE_BTN;
+    public static List<String> FOLLOW_BTN;
+    public static List<String> CREATE_TAB;
+    public static List<String> FRIENDS_TAB;
+    public static List<String> INBOX_TAB;
+    public static List<String> AI_ASSISTANT;
+    public static List<String> AVATAR_IMG;
+    public static List<String> COMMENT_SHEET;
+    public static List<String> QUICK_SHARE;
+    public static String PROFILE_COUNT;
+    public static String SEARCH_BAR_SUGGEST;
+    public static String SEARCH_BAR_ROOT;
+    public static String SEARCH_AI_BOX;
+    public static String VIEWER_CLOSE;
+    public static String STICKER_REPORT;
+    public static String STICKER_CLOSE;
+    public static String DRAWER_LIST;
+
+    private static final int[] COLUMN_MIN_VERSION = {
+            HostVersion.V46_0_3, HostVersion.V46_6_3, HostVersion.V46_9_3,
+    };
+
+    private static int column = COLUMN_MIN_VERSION.length - 1;
+    private static int appliedVc = -1;
+
+    static {
+        apply(HostVersion.code());
+    }
+
+    public static synchronized void init(Context ctx) {
+        HostVersion.init(ctx);
+        int vc = HostVersion.code();
+        if (vc == appliedVc) return;
+        apply(vc);
+        TikToKKK.log("ids: host versionCode " + vc + " -> column " + column);
+    }
+
+    private static synchronized void apply(int versionCode) {
+        appliedVc = versionCode;
+        column = 0;
+        for (int i = COLUMN_MIN_VERSION.length - 1; i >= 0; i--) {
+            if (versionCode >= COLUMN_MIN_VERSION[i]) {
+                column = i;
+                break;
+            }
+        }
+
+        LIKE_BTN = l("ftu,fu0,fu1,fu_,fu2", "g2c,g2i,g2j,g2s,g2k", "g65,g6a,g6b,g6k,g6c");
+        FOLLOW_BTN = l("idu,iek,ieu", "ip3,ipt,iqa", "ium,ivc,ivu");
+        CREATE_TAB = l("nw4", "of9", "olt");
+        FRIENDS_TAB = l("nw7", "ofb", "olw");
+        INBOX_TAB = l("nw9", "ofd", "oly");
+        COMMENT_SHEET = l("ecj,ec6,i4h", "ejd,ei8,ieb", "em3,eky,ijv");
+        QUICK_SHARE = l("xz0", "ysf", "z6f");
+        AI_ASSISTANT = merge(
+                Arrays.asList("tako", "vs_tako_entrance", "aigc_entrance",
+                        "view_stub_ep_aigc_entrance"),
+                l("x_n,xvh", "y3n,yov", "yg7,z2v"));
+        AVATAR_IMG = merge(Arrays.asList("user_avatar"), l("vnh", "wfq", "ws6"));
+
+        PROFILE_COUNT = s("s5x", "svt", "t56");
+        SEARCH_BAR_SUGGEST = s("ubg", "v4e", "vf9");
+        SEARCH_BAR_ROOT = s("ht2", "i3n", "i97");
+        SEARCH_AI_BOX = s("iaf", "iln", "ir9");
+        VIEWER_CLOSE = s("e2o", "e8m", "ea7");
+        STICKER_REPORT = s("fri", "fzo", "g3g");
+        STICKER_CLOSE = s("fqe", "fyk", "g2a");
+        DRAWER_LIST = s("s2b", "su3", "t3e");
+    }
+
+    private static String s(String... perVersion) {
+        return perVersion[column];
+    }
+
+    private static List<String> l(String... perVersion) {
+        return Arrays.asList(perVersion[column].split(","));
+    }
+
+    private static List<String> merge(List<String> stable, List<String> obfuscated) {
+        List<String> all = new ArrayList<>(stable);
+        all.addAll(obfuscated);
+        return all;
+    }
 
     public static String nameOf(View v) {
         try {

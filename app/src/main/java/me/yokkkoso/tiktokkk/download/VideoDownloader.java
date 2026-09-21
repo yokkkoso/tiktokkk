@@ -33,7 +33,6 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class VideoDownloader {
-
     private static volatile Object currentAweme;
 
     public static void install(ClassLoader cl) {
@@ -143,7 +142,7 @@ public final class VideoDownloader {
 
     static boolean isAudioOnly(Object br, Object addr) {
         if (Reflect.str(br, "getGearName").toLowerCase(Locale.ROOT).contains("audio")) return true;
-        if (Reflect.intVal(br, "getMediaType") == 4) return true;   // 4 = audio in TikTok's media types
+        if (Reflect.intVal(br, "getMediaType") == 4) return true;
         String u = Reflect.str(addr, "getUri").toLowerCase(Locale.ROOT);
         if (u.contains("-audio") || u.contains("_audio") || u.contains("/audio")) return true;
         String url = Reflect.firstUrl(addr);
@@ -154,39 +153,75 @@ public final class VideoDownloader {
         return false;
     }
 
+    // 46.9.3 renamed the model fields (bitRate -> bitRateList, playAddr -> playAddrValue, ...) while
+    // the getters kept their names, so resolve through getters first and fall back to both field
+    // spellings. getBitRate() is deliberately not used: it returns an empty list for DASH videos.
+    private static Object bitRates(Object video) {
+        Object list = Reflect.call(video, "getRawBitRate");
+        if (list instanceof List) return list;
+        list = Reflect.field(video, "bitRateList");
+        if (list instanceof List) return list;
+        return Reflect.field(video, "bitRate");
+    }
+
+    private static Object addrOf(Object video, String getter, String... fields) {
+        Object addr = Reflect.call(video, getter);
+        if (Reflect.hasUrls(addr)) return addr;
+        for (String f : fields) {
+            addr = Reflect.field(video, f);
+            if (Reflect.hasUrls(addr)) return addr;
+        }
+        return null;
+    }
+
     private static List<Cand> candidates(Object video) {
         List<Cand> out = new ArrayList<>();
-        Object list = Reflect.field(video, "bitRate");
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        Object list = bitRates(video);
         if (list instanceof List) {
             for (Object br : (List<?>) list) {
-                Object addr = Reflect.field(br, "playAddr");
+                Object addr = Reflect.call(br, "getPlayAddr");
+                if (!Reflect.hasUrls(addr)) addr = Reflect.field(br, "playAddr");
                 if (!Reflect.hasUrls(addr)) continue;
                 if (isAudioOnly(br, addr)) continue;
+                if (!seen.add(Reflect.firstUrl(addr))) continue;
                 int res = Math.max(Reflect.intVal(addr, "getWidth"), Reflect.intVal(addr, "getHeight"));
-                if (res == 0) res = Math.max(Reflect.intVal(br, "getWidth"), Reflect.intVal(br, "getHeight"));
-                if (res == 0) continue;
+                if (res == 0) res = Math.max(Reflect.intVal(video, "getWidth"), Reflect.intVal(video, "getHeight"));
                 String gear = Reflect.str(br, "getGearName");
+                int kbps = Reflect.intVal(br, "getBitRate") / 1000;
                 Cand c = new Cand();
                 c.urlModel = addr;
-                c.label = res + "p" + (gear.isEmpty() ? "" : "  ·  " + gear);
-                c.score = (long) res * 1000L + Reflect.intVal(br, "getBitRate") / 1000L;
+                c.label = (res > 0 ? res + "p" : (kbps > 0 ? kbps + "k" : Loc.t("Standard")))
+                        + (gear.isEmpty() ? "" : "  ·  " + gear);
+                c.score = (long) res * 1000L + kbps;
                 out.add(c);
             }
         }
-        for (String f : new String[]{"downloadNoWatermarkAddr", "newDownloadAddr", "downloadAddr"}) {
-            Object addr = Reflect.field(video, f);
-            if (Reflect.hasUrls(addr)) {
-                Cand c = new Cand();
-                c.urlModel = addr;
-                c.label = f.equals("downloadAddr")
-                        ? Loc.t("Standard") : Loc.t("Standard (No watermark)");
-                c.score = f.equals("downloadNoWatermarkAddr") ? 500 : 1;
-                out.add(c);
-                break;
-            }
-        }
+        addTail(out, seen, addrOf(video, "getDownloadNoWatermarkAddr", "downloadNoWatermarkAddr"),
+                Loc.t("Standard (No watermark)"), 500);
+        addTail(out, seen, addrOf(video, "getNewDownloadAddr", "newDownloadAddr"),
+                Loc.t("Standard (No watermark)"), 400);
+        addTail(out, seen, addrOf(video, "getDownloadAddr", "downloadAddr"), Loc.t("Standard"), 300);
+        addTail(out, seen, addrOf(video, "getUIAlikeDownloadAddr", "uiAlikeAddr"), Loc.t("Standard"), 200);
+        addTail(out, seen, addrOf(video, "getPlayAddr", "playAddrValue", "playAddr"),
+                Loc.t("Standard (No watermark)"), 100);
+        addTail(out, seen, addrOf(video, "getPlayAddrBytevc1", "playAddrBytevc1Value", "playAddrBytevc1"),
+                Loc.t("Standard (No watermark)"), 90);
+        addTail(out, seen, addrOf(video, "getPlayAddrH264", "h264PlayAddrValue", "h264PlayAddr"),
+                Loc.t("Standard (No watermark)"), 80);
         Collections.sort(out, (x, y) -> Long.compare(y.score, x.score));
         return out;
+    }
+
+    private static void addTail(List<Cand> out, java.util.Set<String> seen, Object addr,
+                                String label, long score) {
+        if (addr == null) return;
+        if (!seen.add(Reflect.firstUrl(addr))) return;
+        Cand c = new Cand();
+        c.urlModel = addr;
+        c.label = label;
+        c.score = score;
+        out.add(c);
     }
 
     private static void hqDownload(final Activity a, final Object aweme, final String id) {
@@ -230,7 +265,7 @@ public final class VideoDownloader {
                     if (!u.isEmpty()) return u;
                     break;
                 }
-                if (st == 3) break;   // failed
+                if (st == 3) break;
                 progress(a, Loc.t("Resolving HQ…") + " " + (i + 1) + "s");
                 try { Thread.sleep(1000); } catch (InterruptedException e) { break; }
             }
@@ -294,7 +329,6 @@ public final class VideoDownloader {
         }).start();
     }
 
-    // prog != null -> report download percentage as a live toast (used for the long HQ download).
     private static boolean writeToGallery(final Activity a, final String url, final boolean image,
             final Activity prog) {
         ContentValues cv = new ContentValues();
@@ -351,7 +385,6 @@ public final class VideoDownloader {
 
     private static Toast progToast;
 
-    // A single reused toast, re-shown so it stays visible through the long HQ resolve + download.
     private static void progress(final Activity a, final String msg) {
         a.runOnUiThread(() -> {
             try {
