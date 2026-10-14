@@ -31,7 +31,7 @@ public class TikToKKK implements IXposedHookLoadPackage {
     private static final String TARGET = "com.zhiliaoapp.musically";
     private static final String TARGET_TRILL = "com.ss.android.ugc.trill";
     static final java.util.List<String> TESTED_VERSIONS =
-            java.util.Arrays.asList("46.0.3", "46.6.3", "46.9.3");
+            java.util.Arrays.asList("46.0.3", "46.6.3", "46.9.3", "47.1.4");
     private static boolean versionLogged;
 
     @Override
@@ -52,6 +52,7 @@ public class TikToKKK implements IXposedHookLoadPackage {
         safe("anonymousView", () -> AnonymousView.install(cl));
         safe("urlSanitizer", () -> UrlSanitizer.install(cl));
         safe("featureFlags", () -> FeatureFlags.install(cl));
+        safe("searchInflow", () -> me.yokkkoso.tiktokkk.feed.SearchAdFilter.installInflow(cl));
         safe("topViewBlock", () -> me.yokkkoso.tiktokkk.feed.SplashAdBlock.installTopView(cl));
         safe("commentCopy", () -> me.yokkkoso.tiktokkk.feed.CommentCopy.install(cl));
         safe("repostLimit", () -> me.yokkkoso.tiktokkk.feed.RepostLimit.install(cl));

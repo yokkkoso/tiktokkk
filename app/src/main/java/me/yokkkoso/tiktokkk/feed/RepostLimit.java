@@ -15,7 +15,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class RepostLimit {
-
     public static final String FEATURE = "Unlimited repost note";
 
     private static final String FRAGMENT =
@@ -38,9 +37,6 @@ public final class RepostLimit {
         }
     }
 
-    // The note input is a private field of the fragment whose name is obfuscated per build; the
-    // length cap is the only InputFilter TikTok installs here, so drop filters from whichever
-    // text view carries them.
     private static void clearFilters(Object fragment) {
         int cleared = 0;
         for (Field f : fragment.getClass().getDeclaredFields()) {

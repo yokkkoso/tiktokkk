@@ -14,7 +14,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 
 public final class CommentCopy {
-
     public static final String FEATURE = "Copy comment without username";
 
     private static final Pattern AUTHOR_PREFIX = Pattern.compile("^@([^:\\n]{1,60}):[ \\t]*");
@@ -43,7 +42,6 @@ public final class CommentCopy {
         FeatureStatus.ok(FEATURE, "clipboard");
     }
 
-    // TikTok copies a comment as "@author:text"; anything else is left untouched.
     static String strip(String clip) {
         if (!Prefs.is(Prefs.COPY_COMMENT_NO_AUTHOR)) return clip;
         Matcher m = AUTHOR_PREFIX.matcher(clip);

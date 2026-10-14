@@ -7,6 +7,7 @@ public final class HostVersion {
     public static final int V46_0_3 = 2024600030;
     public static final int V46_6_3 = 2024606030;
     public static final int V46_9_3 = 2024609030;
+    public static final int V47_1_4 = 2024701040;
 
     private static volatile int code = Integer.MAX_VALUE;
     private static volatile String name = "";

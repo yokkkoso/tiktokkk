@@ -8,7 +8,7 @@ Xposed/LSPosed module for the Android TikTok app, with added tweaks and fixes.
   <img src="assets/settings-menu.png" alt="tiktokkk settings panel" width="300">
 </p>
 
-> ❗❗❗ **Supported TikTok versions: `46.0.3`, `46.6.3`, `46.9.3`.** ❗❗❗
+> ❗❗❗ **Supported TikTok versions: `46.0.3`, `46.6.3`, `46.9.3`, `47.1.4`.** ❗❗❗
 > Detection relies on TikTok's obfuscated resource-ids and model symbols, and TikTok renumbers every
 > one of them on each feature release - so on an unlisted version features will silently misbehave
 > or do nothing. The module picks the matching id set from the host versionCode at startup, logs the
@@ -23,10 +23,13 @@ When building from source, the module is compiled against the Android SDK and in
 as either a rooted **LSPosed** module or a rootless **LSPatch** patch - see [Install](#install).
 
 Added settings:
-- **Feed ad filtering**: Hide sponsored posts across the For You, Following, and search feeds,
-  including the TopView ad that TikTok injects as the first post after a cold launch, and the
-  full-screen ad shown while the app opens.
+- **Feed ad filtering**: Hide sponsored posts across the For You, Following and search feeds, the
+  fullscreen feed you swipe into from a search result, TikTok's preloaded ad slots and inserted
+  cards, the TopView ad injected as the first post after a cold launch, and the full-screen ad
+  shown while the app opens.
 - **Keyword filtering**: Hide posts whose caption contains any of your own list of words.
+- **Downloads**: Original (HQ) or watermark-free Standard for videos; for photo slideshows, save the
+  current image, all of them, or any single one.
 - **Clutter filtering**: Hide live streams, Shop posts, slideshows, stories, AI-generated posts, and
   rewarded/location/commission ads. Skip friend-recommendation cards.
 - **Hide UI elements**: Fast-search bar, visual-search tag, Tako AI button, create (+) tab, tab

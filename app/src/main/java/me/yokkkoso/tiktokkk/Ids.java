@@ -38,7 +38,7 @@ public final class Ids {
     public static String DRAWER_LIST;
 
     private static final int[] COLUMN_MIN_VERSION = {
-            HostVersion.V46_0_3, HostVersion.V46_6_3, HostVersion.V46_9_3,
+            HostVersion.V46_0_3, HostVersion.V46_6_3, HostVersion.V46_9_3, HostVersion.V47_1_4,
     };
 
     private static int column = COLUMN_MIN_VERSION.length - 1;
@@ -66,27 +66,27 @@ public final class Ids {
             }
         }
 
-        LIKE_BTN = l("ftu,fu0,fu1,fu_,fu2", "g2c,g2i,g2j,g2s,g2k", "g65,g6a,g6b,g6k,g6c");
-        FOLLOW_BTN = l("idu,iek,ieu", "ip3,ipt,iqa", "ium,ivc,ivu");
-        CREATE_TAB = l("nw4", "of9", "olt");
-        FRIENDS_TAB = l("nw7", "ofb", "olw");
-        INBOX_TAB = l("nw9", "ofd", "oly");
-        COMMENT_SHEET = l("ecj,ec6,i4h", "ejd,ei8,ieb", "em3,eky,ijv");
-        QUICK_SHARE = l("xz0", "ysf", "z6f");
+        LIKE_BTN = l("ftu,fu0,fu1,fu_,fu2", "g2c,g2i,g2j,g2s,g2k", "g65,g6a,g6b,g6k,g6c", "g7z,g85,g86,g8c,g87");
+        FOLLOW_BTN = l("idu,iek,ieu", "ip3,ipt,iqa", "ium,ivc,ivu", "iwi,ix9,ixq");
+        CREATE_TAB = l("nw4", "of9", "olt", "opd");
+        FRIENDS_TAB = l("nw7", "ofb", "olw", "opg");
+        INBOX_TAB = l("nw9", "ofd", "oly", "opi");
+        COMMENT_SHEET = l("ecj,ec6,i4h", "ejd,ei8,ieb", "em3,eky,ijv", "enf,em_,im0");
+        QUICK_SHARE = l("xz0", "ysf", "z6f", "zfv");
         AI_ASSISTANT = merge(
                 Arrays.asList("tako", "vs_tako_entrance", "aigc_entrance",
                         "view_stub_ep_aigc_entrance"),
-                l("x_n,xvh", "y3n,yov", "yg7,z2v"));
-        AVATAR_IMG = merge(Arrays.asList("user_avatar"), l("vnh", "wfq", "ws6"));
+                l("x_n,xvh", "y3n,yov", "yg7,z2v", "yq2,zcb"));
+        AVATAR_IMG = merge(Arrays.asList("user_avatar"), l("vnh", "wfq", "ws6", "wz3"));
 
-        PROFILE_COUNT = s("s5x", "svt", "t56");
-        SEARCH_BAR_SUGGEST = s("ubg", "v4e", "vf9");
-        SEARCH_BAR_ROOT = s("ht2", "i3n", "i97");
-        SEARCH_AI_BOX = s("iaf", "iln", "ir9");
-        VIEWER_CLOSE = s("e2o", "e8m", "ea7");
-        STICKER_REPORT = s("fri", "fzo", "g3g");
-        STICKER_CLOSE = s("fqe", "fyk", "g2a");
-        DRAWER_LIST = s("s2b", "su3", "t3e");
+        PROFILE_COUNT = s("s5x", "svt", "t56", "t_r");
+        SEARCH_BAR_SUGGEST = s("ubg", "v4e", "vf9", "vm1");
+        SEARCH_BAR_ROOT = s("ht2", "i3n", "i97", "ia9");
+        SEARCH_AI_BOX = s("iaf", "iln", "ir9", "it6");
+        VIEWER_CLOSE = s("e2o", "e8m", "ea7", "ebd");
+        STICKER_REPORT = s("fri", "fzo", "g3g", "g5_");
+        STICKER_CLOSE = s("fqe", "fyk", "g2a", "g46");
+        DRAWER_LIST = s("s2b", "su3", "t3e", "t90");
     }
 
     private static String s(String... perVersion) {

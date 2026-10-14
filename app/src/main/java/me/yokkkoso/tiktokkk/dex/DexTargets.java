@@ -99,9 +99,6 @@ public final class DexTargets {
         return searchPush(b, cl, "searchPushMore", "setDataAfterLoadMore");
     }
 
-    // ConvertHelper turns the protobuf feed response into a FeedItemList and is the path a warm
-    // disk cache takes. Its methods cannot be enumerated reflectively (getDeclaredMethods resolves
-    // parameter types the module's classloader cannot see), so resolve only the ones we want.
     public static List<Method> feedConverters(DexKitBridge b, ClassLoader cl) {
         List<Method> out = new ArrayList<>();
         for (int i = 0; ; i++) {

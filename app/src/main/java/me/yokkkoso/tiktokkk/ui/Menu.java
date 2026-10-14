@@ -27,7 +27,7 @@ import me.yokkkoso.tiktokkk.Loc;
 import me.yokkkoso.tiktokkk.Prefs;
 
 public final class Menu {
-    static final String VERSION = "1.3.0";
+    static final String VERSION = "1.4.0";
 
     private static Dialog CURRENT;
     private static FrameLayout HOST;
@@ -330,7 +330,6 @@ public final class Menu {
         LinearLayout wrap = new LinearLayout(a);
         wrap.setOrientation(LinearLayout.VERTICAL);
         wrap.setPadding(0, Theme.dp(a, 16), 0, 0);
-
 
         LinearLayout act = new LinearLayout(a);
         act.setOrientation(LinearLayout.HORIZONTAL);

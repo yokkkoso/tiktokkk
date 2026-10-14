@@ -14,12 +14,61 @@ import org.luckypray.dexkit.DexKitBridge;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
 
 public final class SearchAdFilter {
     public static final String FEATURE = "Hide search ads";
 
     private static final String ITEM =
             "com.ss.android.ugc.aweme.search.pages.result.topsearch.core.model.SearchMixFeed";
+
+    public static final String INFLOW = "Hide search feed ads";
+
+    private static final String SEARCH_MIX =
+            "com.ss.android.ugc.aweme.search.pages.result.topsearch.core.model.SearchMix";
+    private static final String DETAIL_PANEL =
+            "com.ss.android.ugc.aweme.detail.panel.DetailFragmentPanel";
+
+    public static void installInflow(ClassLoader cl) {
+        int n = 0;
+        try {
+            XposedHelpers.findAndHookMethod(SEARCH_MIX, cl, "getAwemeList", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) {
+                    Object r = param.getResult();
+                    if (r instanceof List) FeedFilter.filterAwemes((List<?>) r);
+                }
+            });
+            n++;
+        } catch (Throwable t) {
+            TikToKKK.log("search inflow: SearchMix miss: " + t);
+        }
+        try {
+            Class<?> panel = XposedHelpers.findClass(DETAIL_PANEL, cl);
+            for (Method m : panel.getDeclaredMethods()) {
+                Class<?>[] p = m.getParameterTypes();
+                if (m.getReturnType() != void.class) continue;
+                if (p.length != 2 || p[0] != List.class || p[1] != boolean.class) continue;
+                XposedBridge.hookMethod(m, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        if (param.args[0] instanceof List) {
+                            FeedFilter.filterAwemes((List<?>) param.args[0]);
+                        }
+                    }
+                });
+                n++;
+            }
+        } catch (Throwable t) {
+            TikToKKK.log("search inflow: DetailFragmentPanel miss: " + t);
+        }
+        if (n == 0) {
+            FeatureStatus.failed(INFLOW, "no search inflow hook");
+        } else {
+            FeatureStatus.ok(INFLOW, n + " hook(s)");
+        }
+        TikToKKK.log("search inflow filter: " + n + " hooks");
+    }
 
     public static void install(ClassLoader cl, DexKitBridge bridge) {
         int n = 0;

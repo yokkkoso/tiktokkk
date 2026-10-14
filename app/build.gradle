@@ -10,8 +10,8 @@ android {
         applicationId 'me.yokkkoso.tiktokkk'
         minSdk 24
         targetSdk 34
-        versionCode 8
-        versionName '1.3.0'
+        versionCode 9
+        versionName '1.4.0'
 
         // DexKit ships native libs for 4 ABIs; only these two exist on real devices.
         ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }

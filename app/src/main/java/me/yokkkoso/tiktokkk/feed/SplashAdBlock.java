@@ -23,10 +23,6 @@ public final class SplashAdBlock {
             "com.bytedance.ies.ugc.aweme.commercialize.splash.core.SplashAdServiceImpl";
     private static final String AWEME = "com.ss.android.ugc.aweme.feed.model.Aweme";
 
-    // The TopView ad never arrives inside the feed response: it is built from preloaded JSON and
-    // inserted into the pager afterwards, so no amount of list filtering removes it. Starving that
-    // insert of its Aweme is the one cut that stops it, and null is a case TikTok already handles.
-    // The method name is obfuscated but it is the only (String) -> Aweme on the service.
     public static void installTopView(ClassLoader cl) {
         try {
             Class<?> api = XposedHelpers.findClass(SPLASH_SERVICE, cl);
@@ -63,7 +59,6 @@ public final class SplashAdBlock {
     }
 
     public static void install(ClassLoader cl, DexKitBridge bridge) {
-
         Method m = DexTargets.splashAdColdStart(bridge, cl);
         if (m == null) {
             FeatureStatus.failed(FEATURE, "splash ad entry not found");

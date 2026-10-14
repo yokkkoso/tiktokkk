@@ -13,6 +13,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
@@ -55,6 +57,7 @@ public final class VideoDownloader {
         Object urlModel;
         long score;
         boolean image;
+        boolean noWatermark;
     }
 
     public static void download(Activity a) {
@@ -68,9 +71,11 @@ public final class VideoDownloader {
 
     private static void showPicker(final Activity a, final Object aweme) {
         try {
-            Object video = Reflect.call(aweme, "getVideo");
-            final List<Cand> cands = video != null ? candidates(video) : new ArrayList<>();
-            if (cands.isEmpty()) cands.addAll(imageCandidates(aweme));
+            final List<Cand> cands = new ArrayList<>(imageCandidates(aweme));
+            if (cands.isEmpty()) {
+                Object video = Reflect.call(aweme, "getVideo");
+                if (video != null) cands.addAll(candidates(video));
+            }
             if (cands.isEmpty()) {
                 toast(a, Loc.t("No download URL"));
                 return;
@@ -79,8 +84,21 @@ public final class VideoDownloader {
             final boolean many = photo && cands.size() > 1;
             final String id = photo ? "" : awemeId(aweme);
             final boolean original = !photo && !id.isEmpty();
+            if (!photo) {
+                Cand best = null;
+                for (Cand c : cands) {
+                    if (c.noWatermark) { best = c; break; }
+                }
+                if (best == null) best = cands.get(0);
+                cands.clear();
+                best.label = Loc.t("Standard (No watermark)");
+                cands.add(best);
+            }
+            final int cur = many ? currentPhotoIndex(a, cands.size()) : -1;
+            final boolean hasCurrent = cur >= 0;
             List<String> labels = new ArrayList<>();
             if (original) labels.add(Loc.t("Original (HQ)"));
+            if (hasCurrent) labels.add(Loc.t("Current"));
             if (many) labels.add(Loc.t("All"));
             for (Cand c : cands) labels.add(c.label);
             new AlertDialog.Builder(a, android.R.style.Theme_Material_Dialog_Alert)
@@ -89,6 +107,14 @@ public final class VideoDownloader {
                         int idx = which;
                         if (original) {
                             if (idx == 0) { hqDownload(a, aweme, id); return; }
+                            idx--;
+                        }
+                        if (hasCurrent) {
+                            if (idx == 0) {
+                                Cand c = cands.get(cur);
+                                save(a, Reflect.firstUrl(c.urlModel), true);
+                                return;
+                            }
                             idx--;
                         }
                         if (many && idx == 0) {
@@ -153,9 +179,6 @@ public final class VideoDownloader {
         return false;
     }
 
-    // 46.9.3 renamed the model fields (bitRate -> bitRateList, playAddr -> playAddrValue, ...) while
-    // the getters kept their names, so resolve through getters first and fall back to both field
-    // spellings. getBitRate() is deliberately not used: it returns an empty list for DASH videos.
     private static Object bitRates(Object video) {
         Object list = Reflect.call(video, "getRawBitRate");
         if (list instanceof List) return list;
@@ -194,33 +217,65 @@ public final class VideoDownloader {
                 c.label = (res > 0 ? res + "p" : (kbps > 0 ? kbps + "k" : Loc.t("Standard")))
                         + (gear.isEmpty() ? "" : "  ·  " + gear);
                 c.score = (long) res * 1000L + kbps;
+                c.noWatermark = true;
                 out.add(c);
             }
         }
-        addTail(out, seen, addrOf(video, "getDownloadNoWatermarkAddr", "downloadNoWatermarkAddr"),
-                Loc.t("Standard (No watermark)"), 500);
-        addTail(out, seen, addrOf(video, "getNewDownloadAddr", "newDownloadAddr"),
-                Loc.t("Standard (No watermark)"), 400);
-        addTail(out, seen, addrOf(video, "getDownloadAddr", "downloadAddr"), Loc.t("Standard"), 300);
-        addTail(out, seen, addrOf(video, "getUIAlikeDownloadAddr", "uiAlikeAddr"), Loc.t("Standard"), 200);
-        addTail(out, seen, addrOf(video, "getPlayAddr", "playAddrValue", "playAddr"),
-                Loc.t("Standard (No watermark)"), 100);
-        addTail(out, seen, addrOf(video, "getPlayAddrBytevc1", "playAddrBytevc1Value", "playAddrBytevc1"),
-                Loc.t("Standard (No watermark)"), 90);
-        addTail(out, seen, addrOf(video, "getPlayAddrH264", "h264PlayAddrValue", "h264PlayAddr"),
-                Loc.t("Standard (No watermark)"), 80);
+        Object download = addrOf(video, "getDownloadNoWatermarkAddr", "downloadNoWatermarkAddr");
+        if (download == null) download = addrOf(video, "getNewDownloadAddr", "newDownloadAddr");
+        boolean clean = download != null;
+        if (download == null) download = addrOf(video, "getDownloadAddr", "downloadAddr");
+        if (download == null) download = addrOf(video, "getUIAlikeDownloadAddr", "uiAlikeAddr");
+        addTail(out, seen, download, Loc.t("Standard"), 300, clean);
+
+        if (out.isEmpty()) {
+            Object play = addrOf(video, "getPlayAddr", "playAddrValue", "playAddr");
+            if (play == null) {
+                play = addrOf(video, "getPlayAddrBytevc1", "playAddrBytevc1Value", "playAddrBytevc1");
+            }
+            if (play == null) play = addrOf(video, "getPlayAddrH264", "h264PlayAddrValue", "h264PlayAddr");
+            addTail(out, seen, play, Loc.t("Standard (No watermark)"), 100, true);
+        }
         Collections.sort(out, (x, y) -> Long.compare(y.score, x.score));
         return out;
     }
 
+    private static int currentPhotoIndex(Activity a, int count) {
+        if (a == null || count <= 1) return -1;
+        try {
+            java.util.ArrayDeque<View> q = new java.util.ArrayDeque<>();
+            q.add(a.getWindow().getDecorView());
+            int scanned = 0;
+            while (!q.isEmpty() && scanned < 4000) {
+                View v = q.poll();
+                scanned++;
+                if (v.getClass().getName().contains("ViewPager") && v.getVisibility() == View.VISIBLE) {
+                    Object adapter = Reflect.call(v, "getAdapter");
+                    int n = adapter == null ? 0 : Math.max(Reflect.intVal(adapter, "getItemCount"),
+                            Reflect.intVal(adapter, "getCount"));
+                    if (n == count) {
+                        int idx = Reflect.intVal(v, "getCurrentItem");
+                        if (idx >= 0 && idx < count) return idx;
+                    }
+                }
+                if (v instanceof ViewGroup) {
+                    ViewGroup g = (ViewGroup) v;
+                    for (int i = 0; i < g.getChildCount(); i++) q.add(g.getChildAt(i));
+                }
+            }
+        } catch (Throwable ignored) {}
+        return -1;
+    }
+
     private static void addTail(List<Cand> out, java.util.Set<String> seen, Object addr,
-                                String label, long score) {
+                                String label, long score, boolean noWatermark) {
         if (addr == null) return;
         if (!seen.add(Reflect.firstUrl(addr))) return;
         Cand c = new Cand();
         c.urlModel = addr;
         c.label = label;
         c.score = score;
+        c.noWatermark = noWatermark;
         out.add(c);
     }
 

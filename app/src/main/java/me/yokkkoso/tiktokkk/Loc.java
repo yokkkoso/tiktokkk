@@ -170,6 +170,8 @@ public final class Loc {
         M.put("Original", "Оригинал");
         M.put("Standard", "Стандарт");
         M.put("Standard (No watermark)", "Стандарт (без вотермарка)");
+        M.put("Current", "Текущее");
+        M.put("Hide search feed ads", "Скрывать рекламу в ленте поиска");
         M.put("HQ (largest)", "HQ (макс.)");
         M.put("No watermark", "Без вотермарка");
         M.put("Follow this account?", "Подписаться на аккаунт?");

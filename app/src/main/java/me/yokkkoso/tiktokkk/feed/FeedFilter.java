@@ -36,9 +36,7 @@ public final class FeedFilter {
         hookGetter(cl, FOLLOW_FEED_LIST, "getInsertResults");
         hookSetItems(cl, FOLLOW_FEED_LIST);
         hookGetter(cl, FOLLOWING_INTEREST, "getAwemeList");
-        // The getters above are bypassed on some builds, so also filter where every FeedItemList is
-        // produced: the api funnel and the protobuf converter. Both are matched by return type, not
-        // by method name, because only the class names survive obfuscation.
+
         hookProducers(cl, FEED_API_SERVICE);
     }
 
@@ -77,10 +75,40 @@ public final class FeedFilter {
         }
     }
 
+    public static void filterAwemes(List<?> items) {
+        if (items != null) filter(items);
+    }
+
     private static void filterItemsOf(Object feedItemList) {
         if (feedItemList == null) return;
         Object list = Reflect.field(feedItemList, "items");
         if (list instanceof List) filter((List<?>) list);
+        if (!Prefs.is(Prefs.HIDE_FEED_ADS)) return;
+        clearAll(Reflect.field(feedItemList, "preloadAds"), "preloadAds");
+        dropAds(Reflect.field(feedItemList, "cardInsertResults"), "cardInsertResults");
+    }
+
+    private static void clearAll(Object list, String what) {
+        if (!(list instanceof List) || ((List<?>) list).isEmpty()) return;
+        int n = ((List<?>) list).size();
+        try {
+            ((List<?>) list).clear();
+            TikToKKK.log("feed filter: cleared " + n + " " + what);
+        } catch (Throwable ignored) {}
+    }
+
+    private static void dropAds(Object list, String what) {
+        if (!(list instanceof List) || ((List<?>) list).isEmpty()) return;
+        List<?> l = (List<?>) list;
+        List<Object> drop = new ArrayList<>();
+        for (Object item : l) {
+            if (item != null && shouldDrop(awemeOf(item))) drop.add(item);
+        }
+        if (drop.isEmpty()) return;
+        try {
+            l.removeAll(drop);
+            TikToKKK.log("feed filter: dropped " + drop.size() + " from " + what);
+        } catch (Throwable ignored) {}
     }
 
     private static void hookGetter(ClassLoader cl, String className, String method) {
@@ -131,9 +159,15 @@ public final class FeedFilter {
                     + " rawAd=" + (Reflect.call(first, "getAwemeRawAd") != null)
                     + " type=" + Reflect.intVal(first, "getAwemeType") + "}");
         }
-        if (drop != null) {
+
+        if (drop != null && drop.size() < items.size()) {
             try { items.removeAll(drop); } catch (Throwable ignored) {}
-            if (items.isEmpty()) TikToKKK.log("feed filter: page was all ads, removed " + drop.size());
+            if (drop.size() * 2 >= items.size() + drop.size()) {
+                TikToKKK.log("feed filter: dropped " + drop.size() + " of "
+                        + (items.size() + drop.size()) + " on one page");
+            }
+        } else if (drop != null) {
+            TikToKKK.log("feed filter: page was entirely filtered (" + drop.size() + "), kept as-is");
         }
         return items;
     }
