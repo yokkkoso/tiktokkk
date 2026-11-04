@@ -2,6 +2,29 @@
 
 Xposed/LSPosed module for the Android TikTok app, with added tweaks and fixes.
 
+<div align="center">
+
+# ⚠️ This project is deprecated
+
+[![status](https://img.shields.io/badge/status-deprecated-red?style=for-the-badge)](https://github.com/SysAdminDoc/hushfeed)
+[![use instead](https://img.shields.io/badge/use%20instead-Hushfeed-6f42c1?style=for-the-badge&logo=github)](https://github.com/SysAdminDoc/hushfeed)
+
+</div>
+
+> [!WARNING]
+> **This repository is no longer maintained and has been archived.**
+> No new updates, fixes or support will be provided here.
+
+> [!TIP]
+> **Please use [Hushfeed](https://github.com/SysAdminDoc/hushfeed) instead.**
+> It's an actively maintained Morphe patch bundle for TikTok with 70+ patches: feed filtering, watermark-free downloads, playback controls, privacy options and a native settings screen.
+>
+> 👉 **[Add Hushfeed to Morphe](https://morphe.software/add-source?github=SysAdminDoc/hushfeed)** · **[Latest release](https://github.com/SysAdminDoc/hushfeed/releases/latest)**
+
+Thanks to everyone who used and supported this project! ❤️
+
+---
+
 <p align="center">
   <img src="assets/settings-entry.png" alt="mod settings entry under Settings and privacy" width="300">
   &nbsp;&nbsp;
